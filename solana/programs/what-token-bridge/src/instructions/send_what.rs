@@ -1,0 +1,157 @@
+use anchor_lang::prelude::*;
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token_2022::Token2022,
+    token_interface::{Mint, TokenAccount},
+};
+use wormhole_anchor_sdk::wormhole::{self, program::Wormhole};
+
+use crate::{
+    constants::{SEED_PREFIX_CONFIG, SEED_PREFIX_MESSAGE},
+    helper::{compute_adjusted_amount, get_transfer_fee, transfer_token_to_pool},
+    ConfigAccount, WhatTokenBridgeMessage, WhatTokenBrigdeError,
+};
+pub type EvmAddress = [u8; 20];
+
+#[derive(AnchorSerialize)]
+struct SendMessage<'a> {
+    recipient_address: &'a EvmAddress,
+}
+
+#[derive(Accounts)]
+pub struct LockAndSend<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    #[account(mut)]
+    pub what_mint: Box<InterfaceAccount<'info, Mint>>,
+    #[account(
+        mut,
+        constraint = config_account.what_mint == what_mint.key() @ WhatTokenBrigdeError::InvalidMint
+    )]
+    pub config_account: Box<Account<'info, ConfigAccount>>,
+
+    #[account(mut)]
+    pub vault_token_account: InterfaceAccount<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub user_token_account: InterfaceAccount<'info, TokenAccount>,
+
+    #[account(
+        mut,
+        seeds = [SEED_PREFIX_MESSAGE],
+        bump,
+      )]
+    /// CHECK: initialized and written to by wormhole core bridge
+    pub wormhole_message: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    /// CHECK: account will be checked and maybe initialized by the wormhole core bridge
+    pub wormhole_sequence: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    /// CHECK: address will be checked by the wormhole core bridge
+    pub wormhole_bridge: Account<'info, wormhole::BridgeData>,
+
+    #[account(
+        mut,
+        seeds = [wormhole::FeeCollector::SEED_PREFIX],
+        bump,
+        seeds::program = wormhole_program.key
+    )]
+    pub wormhole_fee_collector: Account<'info, wormhole::FeeCollector>,
+
+    pub wormhole_program: Program<'info, Wormhole>,
+
+    pub token_2022_program: Program<'info, Token2022>,
+
+    pub associated_token_program: Program<'info, AssociatedToken>,
+
+    pub clock: Sysvar<'info, Clock>,
+
+    pub rent: Sysvar<'info, Rent>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[event]
+pub struct SendWhatEvent {
+    pub user: Pubkey,
+    pub amount: u64,
+    pub timestamp: i64,
+}
+
+pub fn lock_and_send(ctx: Context<LockAndSend>, amount: u64, recipient: &EvmAddress) -> Result<()> {
+    let config_account = &mut *ctx.accounts.config_account;
+
+    let adjust_amount = compute_adjusted_amount(config_account, &ctx.accounts.user.key(), amount)?;
+
+    let clock = Clock::get()?;
+
+    transfer_token_to_pool(
+        ctx.accounts.user_token_account.to_account_info(),
+        ctx.accounts.vault_token_account.to_account_info(),
+        ctx.accounts.user.to_account_info(),
+        ctx.accounts.token_2022_program.to_account_info(),
+        ctx.accounts.what_mint.clone(),
+        adjust_amount,
+    )?;
+
+    let amount_transfer_fee = get_transfer_fee(ctx.accounts.what_mint.clone(), amount ).unwrap();
+
+
+    //transfer Wormhole fee to fee collector account if nessesary
+    if ctx.accounts.wormhole_bridge.fee() > 0 {
+        anchor_lang::system_program::transfer(
+            CpiContext::new(
+                ctx.accounts.system_program.to_account_info(),
+                anchor_lang::system_program::Transfer {
+                    from: ctx.accounts.user.to_account_info(),
+                    to: ctx.accounts.wormhole_fee_collector.to_account_info(),
+                },
+            ),
+            ctx.accounts.wormhole_bridge.fee(),
+        )?;
+    }
+
+    let message_bump = ctx.bumps.wormhole_message;
+
+    let finalized_amount = adjust_amount.checked_sub(amount_transfer_fee).unwrap();
+
+    let payload: Vec<u8> = WhatTokenBridgeMessage::Send {
+        recipient: *recipient,
+        amount: finalized_amount.to_be_bytes(),
+    }
+    .try_to_vec()?;
+
+    wormhole::post_message(
+        CpiContext::new_with_signer(
+            ctx.accounts.wormhole_program.to_account_info(),
+            wormhole::PostMessage {
+                config: ctx.accounts.wormhole_bridge.to_account_info(),
+                message: ctx.accounts.wormhole_message.to_account_info(),
+                emitter: ctx.accounts.config_account.to_account_info(),
+                sequence: ctx.accounts.wormhole_sequence.to_account_info(),
+                payer: ctx.accounts.user.to_account_info(),
+                fee_collector: ctx.accounts.wormhole_fee_collector.to_account_info(),
+                clock: ctx.accounts.clock.to_account_info(),
+                rent: ctx.accounts.rent.to_account_info(),
+                system_program: ctx.accounts.system_program.to_account_info(),
+            },
+            &[
+                &[SEED_PREFIX_CONFIG, &[ctx.accounts.config_account.bump]],
+                &[SEED_PREFIX_MESSAGE, &[message_bump]],
+            ],
+        ),
+        0,
+        payload,
+        wormhole::Finality::Finalized,
+    )?;
+
+    emit!(SendWhatEvent {
+        user: *ctx.accounts.user.key,
+        amount: finalized_amount,
+        timestamp: clock.unix_timestamp,
+    });
+
+    Ok(())
+}
