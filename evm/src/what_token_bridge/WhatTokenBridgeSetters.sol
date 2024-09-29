@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity ^0.8.19;
 
-import "./WhatTokenBrigdeState.sol";
+import "./WhatTokenBridgeState.sol";
 
-contract WhatTokenBrigdeSetters is WhatTokenBrigdeState {
+contract WhatTokenBridgeSetters is WhatTokenBridgeState {
     function setOwner(address owner_) internal {
         _state.owner = owner_;
     }

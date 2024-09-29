@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use wormhole_anchor_sdk::wormhole::{self, program::Wormhole};
 
 use crate::{
-    constants::SEED_PREFIX_CONFIG, helper::transfer_from_pool_to_user, ConfigAccount, ForeignEmitter, Received, WhatTokenBridgeMessage, WhatTokenBrigdeError
+    constants::SEED_PREFIX_CONFIG, helper::transfer_from_pool_to_user, ConfigAccount, ForeignEmitter, Received, WhatTokenBridgeError, WhatTokenBridgeMessage
 };
 
 use anchor_spl::{
@@ -37,7 +37,7 @@ pub struct RedeemWhat<'info> {
 
     #[account(
         mut,
-        constraint = config_account.what_mint == what_mint.key() @ WhatTokenBrigdeError::InvalidMint
+        constraint = config_account.what_mint == what_mint.key() @ WhatTokenBridgeError::InvalidMint
     )]
     pub config_account: Account<'info, ConfigAccount>,
 
@@ -76,7 +76,7 @@ pub struct RedeemWhat<'info> {
             &posted.emitter_chain().to_le_bytes()[..]
         ],
         bump,
-        constraint = foreign_emitter.verify(posted.emitter_address()) @ WhatTokenBrigdeError::InvalidForeignEmitter
+        constraint = foreign_emitter.verify(posted.emitter_address()) @ WhatTokenBridgeError::InvalidForeignEmitter
     )]
     pub foreign_emitter: Account<'info, ForeignEmitter>,
 
@@ -97,7 +97,7 @@ pub fn redeem_what(ctx: Context<RedeemWhat>, vaa_hash: [u8; 32]) -> Result<()> {
     if let WhatTokenBridgeMessage::Redeem { recipient, amount } = posted_message.data() {
         require!(
             ctx.accounts.recipient.key().to_bytes() == *recipient,
-            WhatTokenBrigdeError::InvalidRecipient
+            WhatTokenBridgeError::InvalidRecipient
         );
 
         let signer: &[&[u8]] = &[SEED_PREFIX_CONFIG, &[config_account.bump]];
@@ -125,6 +125,6 @@ pub fn redeem_what(ctx: Context<RedeemWhat>, vaa_hash: [u8; 32]) -> Result<()> {
 
         Ok(())
     } else {
-        Err(WhatTokenBrigdeError::InvalidData.into())
+        Err(WhatTokenBridgeError::InvalidData.into())
     }
 }

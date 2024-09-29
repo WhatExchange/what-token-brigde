@@ -10,7 +10,7 @@ import {
   sendAndConfirmTransaction,
   Signer,
 } from "@solana/web3.js";
-import { WhatTokenBridge } from "../sdk/what_transfer_token_brigde";
+import { WhatTokenBridge } from "../sdk/what_transfer_token_bridge";
 import {
   LOCALHOST,
   PAYER_KEYPAIR,

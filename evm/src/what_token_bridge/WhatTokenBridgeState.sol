@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "modules/wormhole/IWormhole.sol";
 
-contract WhatTokenBrigdeStorage {
+contract WhatTokenBridgeStorage {
     struct Lock {
         address recipient;
         uint256 amount;
@@ -30,6 +30,6 @@ contract WhatTokenBrigdeStorage {
     }
 }
 
-contract WhatTokenBrigdeState {
-    WhatTokenBrigdeStorage.State _state;
+contract WhatTokenBridgeState {
+    WhatTokenBridgeStorage.State _state;
 }

@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{ConfigAccount, WhatTokenBrigdeError};
+use crate::{ConfigAccount, WhatTokenBridgeError};
 
 #[derive(Accounts)]
 pub struct UpdateConfig<'info> {
@@ -8,7 +8,7 @@ pub struct UpdateConfig<'info> {
     pub owner: Signer<'info>,
     #[account(
         mut,
-        constraint = config_account.owner == *owner.key  @ WhatTokenBrigdeError::Unauthorized
+        constraint = config_account.owner == *owner.key  @ WhatTokenBridgeError::Unauthorized
     )]
     pub config_account: Account<'info, ConfigAccount>,
 

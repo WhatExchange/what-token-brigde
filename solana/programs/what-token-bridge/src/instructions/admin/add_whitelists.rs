@@ -1,13 +1,13 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 
-use crate::{constants::SEED_PREFIX_CONFIG, ConfigAccount, WhatTokenBrigdeError};
+use crate::{constants::SEED_PREFIX_CONFIG, ConfigAccount, WhatTokenBridgeError};
 
 #[derive(Accounts)]
 pub struct AddWhitelists<'info> {
     #[account(
         mut,
-        constraint = config_account.owner == *owner.key  @ WhatTokenBrigdeError::Unauthorized
+        constraint = config_account.owner == *owner.key  @ WhatTokenBridgeError::Unauthorized
     )]
     pub owner: Signer<'info>,
     #[account(mut)]

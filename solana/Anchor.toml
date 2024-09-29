@@ -1,39 +1,41 @@
+[toolchain]
+
 [features]
-seeds = false
+resolution = true
 skip-lint = false
 
-[workspace]
-members = [
-    "programs/what-token-bridge",
-]
-
 [programs.localnet]
-what_token_brigde = "Scaffo1dingWhatTokenBrigde11111111111111111"
+what_token_bridge = "3jpFhHiErPVYLUJs6UwgSXmJvgjVtGgiZYrBb8Y3bvQG"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
+
+[workspace]
+members = ["programs/what-token-bridge"]
 
 [scripts]
 test = "npx ts-mocha -p ./tsconfig.json -t 1000000 ts/tests/*.ts"
 
 [test]
 startup_wait = 10000
+shutdown_wait = 2000
+upgradeable = false
 
 [test.validator]
+bind_address = "0.0.0.0"
 url = "https://api.mainnet-beta.solana.com"
+ledger = ".anchor/test-ledger"
+rpc_port = 8899
 
-### MPL Token Metadata
 [[test.validator.clone]]
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 
-### Wormhole Core Bridge
 [[test.validator.clone]]
 address = "worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth"
 
-### Wormhole Token Bridge
 [[test.validator.clone]]
 address = "wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb"

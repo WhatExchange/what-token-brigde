@@ -13,7 +13,7 @@ use anchor_spl::{
     token_interface::Mint,
 };
 
-use crate::{constants::BASIS_POINTS, ConfigAccount, WhatTokenBrigdeError};
+use crate::{constants::BASIS_POINTS, ConfigAccount, WhatTokenBridgeError};
 
 pub fn compute_adjusted_amount(
     config_account: &ConfigAccount,
@@ -38,11 +38,11 @@ pub fn compute_adjusted_amount(
                 let fee = fee_u128
                     .checked_mul(amount as u128)
                     .and_then(|r| r.checked_div(basis_points_128))
-                    .ok_or(WhatTokenBrigdeError::Overflow)?;
+                    .ok_or(WhatTokenBridgeError::Overflow)?;
 
                 adjust_amount = amount
                     .checked_sub(fee as u64)
-                    .ok_or(WhatTokenBrigdeError::Overflow)?;
+                    .ok_or(WhatTokenBridgeError::Overflow)?;
             } else {
                 adjust_amount = amount;
             }

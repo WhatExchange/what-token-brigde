@@ -6,8 +6,8 @@ import "modules/utils/BytesLib.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-import "./WhatTokenBrigdeGetters.sol";
-import "./WhatTokenBrigdeMessages.sol";
+import "./WhatTokenBridgeGetters.sol";
+import "./WhatTokenBridgeMessages.sol";
 import "./WhatTokenBridgeErrors.sol";
 
 /**
@@ -15,9 +15,9 @@ import "./WhatTokenBridgeErrors.sol";
  * @notice This contract handles locking tokens on the source chain and
  *         sending a message via Wormhole to unlock tokens on the destination chain.
  */
-contract WhatTokenBrigde is
-    WhatTokenBrigdeGetters,
-    WhatTokenBrigdeMessages,
+contract WhatTokenBridge is
+    WhatTokenBridgeGetters,
+    WhatTokenBridgeMessages,
     WhatTokenBridgeErrors,
     ReentrancyGuard
 {

@@ -48,8 +48,6 @@ export class WhatTokenBridge {
     this.whatMint = new PublicKey(whatMint);
   }
 
-
-
   get configPDA(): PublicKey {
     return PublicKey.findProgramAddressSync(
       [SEED_PREFIX_CONFIG],

@@ -1,4 +1,4 @@
-# What Token Brigde
+# What Token Bridge
 
 ## Prerequisites
 

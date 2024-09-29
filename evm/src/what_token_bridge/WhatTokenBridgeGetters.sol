@@ -2,11 +2,11 @@
 pragma solidity ^0.8.19;
 
 import "modules/wormhole/IWormhole.sol";
-import "./WhatTokenBrigdeSetters.sol";
-import "./WhatTokenBrigdeMessages.sol";
-import "./WhatTokenBrigdeState.sol";
+import "./WhatTokenBridgeSetters.sol";
+import "./WhatTokenBridgeMessages.sol";
+import "./WhatTokenBridgeState.sol";
 
-contract WhatTokenBrigdeGetters is WhatTokenBrigdeSetters {
+contract WhatTokenBridgeGetters is WhatTokenBridgeSetters {
     function owner() public view returns (address) {
         return _state.owner;
     }
@@ -32,7 +32,7 @@ contract WhatTokenBrigdeGetters is WhatTokenBrigdeSetters {
     }
 
     function getReceivedMessage(bytes32 hash) public view returns (address recipient, uint256 amount) {
-        WhatTokenBrigdeStorage.Lock memory message = _state.receivedMessages[hash];
+        WhatTokenBridgeStorage.Lock memory message = _state.receivedMessages[hash];
         return (message.recipient, message.amount);
     }
 

@@ -6,21 +6,21 @@ import "forge-std/console.sol";
 
 import {WormholeSimulator, SigningWormholeSimulator} from "modules/wormhole/WormholeSimulator.sol";
 
-import "contracts/what_token_brigde/WhatTokenBrigde.sol";
-import "contracts/what_token_brigde/WhatTokenBrigdeStructs.sol";
+import "contracts/what_token_bridge/WhatTokenBridge.sol";
+import "contracts/what_token_bridge/WhatTokenBridgeStructs.sol";
 
 /**
- * @title A Test Suite for the EVM WhatTokenBrigde Contracts
+ * @title A Test Suite for the EVM WhatTokenBridge Contracts
  */
-contract WhatTokenBrigdeTest is Test {
+contract WhatTokenBridgeTest is Test {
     // guardian private key for simulated signing of Wormhole messages
     uint256 guardianSigner;
 
     // contract instances
     IWormhole wormhole;
     WormholeSimulator wormholeSimulator;
-    WhatTokenBrigde whatTokenBrigdeSource;
-    WhatTokenBrigde whatTokenBrigdeTarget;
+    WhatTokenBridge whatTokenBridgeSource;
+    WhatTokenBridge whatTokenBridgeTarget;
 
     /**
      * @notice Sets up the wormholeSimulator contracts and deploys HelloWorld
@@ -48,13 +48,13 @@ contract WhatTokenBrigdeTest is Test {
         );
 
         // initialize "source chain" HelloWorld contract
-        whatTokenBrigdeSource = new WhatTokenBrigde(address(wormhole), wormhole.chainId(), uint8(1), uint32(1000000), uint32(100000));
+        whatTokenBridgeSource = new WhatTokenBridge(address(wormhole), wormhole.chainId(), uint8(1), uint32(1000000), uint32(100000));
 
         // initialize "target chain" HelloWorld contract
-        whatTokenBrigdeTarget = new WhatTokenBrigde(address(wormhole), uint8(2), uint8(1), uint32(1000000), uint32(100000));
+        whatTokenBridgeTarget = new WhatTokenBridge(address(wormhole), uint8(2), uint8(1), uint32(1000000), uint32(100000));
 
         // confirm that the source and target contract addresses are different
-        assertTrue(address(whatTokenBrigdeSource) != address(whatTokenBrigdeTarget));
+        assertTrue(address(whatTokenBridgeSource) != address(whatTokenBridgeTarget));
     }
 
     /**
@@ -66,8 +66,8 @@ contract WhatTokenBrigdeTest is Test {
         uint256 amount
     ) public {
         // encode the message by calling the encodeMessage method
-        bytes memory encodedMessage = whatTokenBrigdeSource.encodeMessage(
-            WhatTokenBrigdeStructs.TransferMessage({
+        bytes memory encodedMessage = whatTokenBridgeSource.encodeMessage(
+            WhatTokenBridgeStructs.TransferMessage({
                 payloadID: uint8(1),
                 recipient: recipient,
                 amount: amount
@@ -75,7 +75,7 @@ contract WhatTokenBrigdeTest is Test {
         );
 
         // decode the message by calling the decodeMessage method
-        WhatTokenBrigdeStructs.TransferMessage memory results = whatTokenBrigdeSource.decodeMessage(encodedMessage);
+        WhatTokenBridgeStructs.TransferMessage memory results = whatTokenBridgeSource.decodeMessage(encodedMessage);
 
         // verify the parsed output
         assertEq(results.payloadID, 1);

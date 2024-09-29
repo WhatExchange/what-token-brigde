@@ -6,18 +6,18 @@ import "forge-std/Script.sol";
 import "forge-std/console.sol";
 
 import {IWormhole} from "modules/wormhole/IWormhole.sol";
-import {WhatTokenBrigde} from "contracts/what_token_brigde/WhatTokenBrigde.sol";
+import {WhatTokenBridge} from "contracts/what_token_bridge/WhatTokenBridge.sol";
 
 contract ContractScript is Script {
     IWormhole wormhole;
-    WhatTokenBrigde whatTokenBrigde;
+    WhatTokenBridge whatTokenBridge;
 
     function setUp() public {
         wormhole = IWormhole(vm.envAddress("TESTING_WORMHOLE_ADDRESS"));
     }
 
-    function deployWhatTokenBrigde() public {
-        whatTokenBrigde = new WhatTokenBrigde(
+    function deployWhatTokenBridge() public {
+        whatTokenBridge = new WhatTokenBridge(
             address(wormhole),
             wormhole.chainId(),
             1, // wormholeFinality
@@ -29,7 +29,7 @@ contract ContractScript is Script {
     function run() public {
         vm.startBroadcast();
 
-        deployWhatTokenBrigde();
+        deployWhatTokenBridge();
 
         vm.stopBroadcast();
     }

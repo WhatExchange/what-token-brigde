@@ -20,10 +20,10 @@ import {
 } from "./helpers/consts";
 import {
   formatWormholeMessageFromReceipt,
-  readWhatTokenBrigdeContractAddress,
+  readWhatTokenBridgeContractAddress,
   readWormUSDContractAddress,
 } from "./helpers/utils";
-import {WhatTokenBrigde__factory, IWormhole__factory, IERC20__factory} from "../ethers-contracts";
+import {WhatTokenBridge__factory, IWormhole__factory, IERC20__factory} from "../ethers-contracts";
 
 describe("What token bridge Test", () => {
   // avax wallet
@@ -53,35 +53,35 @@ describe("What token bridge Test", () => {
     ethWallet
   );
 
-  const avaxWhatTokenBrigde = WhatTokenBrigde__factory.connect(
-    readWhatTokenBrigdeContractAddress(FORK_AVAX_CHAIN_ID as ChainId),
+  const avaxWhatTokenBridge = WhatTokenBridge__factory.connect(
+    readWhatTokenBridgeContractAddress(FORK_AVAX_CHAIN_ID as ChainId),
     avaxWallet
   );
 
-  const ethWhatTokenBrigde  = WhatTokenBrigde__factory.connect(
-    readWhatTokenBrigdeContractAddress(FORK_ETH_CHAIN_ID as ChainId),
+  const ethWhatTokenBridge  = WhatTokenBridge__factory.connect(
+    readWhatTokenBridgeContractAddress(FORK_ETH_CHAIN_ID as ChainId),
     ethWallet
   );
 
   describe("Test Contract Deployment and Emitter Registration", () => {
     it("Verify AVAX Contract Deployment", async () => {
-      const deployedChainId = await avaxWhatTokenBrigde.chainId();
+      const deployedChainId = await avaxWhatTokenBridge.chainId();
       expect(deployedChainId).to.equal(CHAIN_ID_AVAX);
     });
 
     it("Verify ETH Contract Deployment", async () => {
-      const deployedChainId = await ethWhatTokenBrigde.chainId();
+      const deployedChainId = await ethWhatTokenBridge.chainId();
       expect(deployedChainId).to.equal(CHAIN_ID_ETH);
     });   
 
-    it("Should Register Brigde Contract Emitter on AVAX", async () => {
+    it("Should Register Bridge Contract Emitter on AVAX", async () => {
       // Convert the target contract address to bytes32, since other
       // non-evm blockchains (e.g. Solana) have 32 byte wallet addresses.
       const targetContractAddressHex =
-        "0x" + tryNativeToHexString(ethWhatTokenBrigde.address, CHAIN_ID_ETH);
+        "0x" + tryNativeToHexString(ethWhatTokenBridge.address, CHAIN_ID_ETH);
 
       // register the emitter
-      const receipt = await avaxWhatTokenBrigde
+      const receipt = await avaxWhatTokenBridge
         .registerEmitter(CHAIN_ID_ETH, targetContractAddressHex)
         .then((tx: ethers.ContractTransaction) => tx.wait())
         .catch((msg: any) => {
@@ -92,19 +92,19 @@ describe("What token bridge Test", () => {
       expect(receipt).is.not.null;
 
       // query the contract and confirm that the emitter is set in storage
-      const emitterInContractState = await avaxWhatTokenBrigde.getRegisteredEmitter(
+      const emitterInContractState = await avaxWhatTokenBridge.getRegisteredEmitter(
         CHAIN_ID_ETH
       );
       expect(emitterInContractState).to.equal(targetContractAddressHex);
     });
 
-    it("Should Register Brigde Contract Emitter on ETH", async () => {
+    it("Should Register Bridge Contract Emitter on ETH", async () => {
       // Convert the target contract address to bytes32, since other
       // non-evm blockchains (e.g. Solana) have 32 byte wallet addresses.
       const targetContractAddressHex =
-        "0x" + tryNativeToHexString(avaxWhatTokenBrigde.address, CHAIN_ID_AVAX);
+        "0x" + tryNativeToHexString(avaxWhatTokenBridge.address, CHAIN_ID_AVAX);
 
-      const receipt = await ethWhatTokenBrigde
+      const receipt = await ethWhatTokenBridge
         .registerEmitter(CHAIN_ID_AVAX, targetContractAddressHex)
         .then((tx: ethers.ContractTransaction) => tx.wait())
         .catch((msg: any) => {
@@ -113,14 +113,14 @@ describe("What token bridge Test", () => {
         });
       expect(receipt).is.not.null;
 
-      const emitterInContractState = await ethWhatTokenBrigde.getRegisteredEmitter(
+      const emitterInContractState = await ethWhatTokenBridge.getRegisteredEmitter(
         CHAIN_ID_AVAX
       );
       expect(emitterInContractState).to.equal(targetContractAddressHex);
     });
 
     it("Should Register What Token on AVAX", async () => {
-      const receipt = await avaxWhatTokenBrigde
+      const receipt = await avaxWhatTokenBridge
         .setWhatTokenAddress(avaxWormWhatToken.address)
         .then((tx: ethers.ContractTransaction) => tx.wait())
         .catch((msg: any) => {
@@ -129,12 +129,12 @@ describe("What token bridge Test", () => {
         });
       expect(receipt).is.not.null;
 
-      const whatTokenAddress = await avaxWhatTokenBrigde.whatToken();
+      const whatTokenAddress = await avaxWhatTokenBridge.whatToken();
       expect(whatTokenAddress.toLowerCase()).to.equal(avaxWormWhatToken.address.toLowerCase());
     });
 
     it("Should Register What Token on ETH", async () => {
-      const receipt = await ethWhatTokenBrigde
+      const receipt = await ethWhatTokenBridge
         .setWhatTokenAddress(ethWormWhatToken.address)
         .then((tx: ethers.ContractTransaction) => tx.wait())
         .catch((msg: any) => {
@@ -143,12 +143,12 @@ describe("What token bridge Test", () => {
         });
       expect(receipt).is.not.null;
 
-      const whatTokenAddress = await ethWhatTokenBrigde.whatToken();
+      const whatTokenAddress = await ethWhatTokenBridge.whatToken();
       expect(whatTokenAddress.toLowerCase()).to.equal(ethWormWhatToken.address.toLowerCase());
     });
   });
 
-  describe("Test What Token Brigde Interface", () => {
+  describe("Test What Token Bridge Interface", () => {
     const guardians = new MockGuardians(AVAX_WORMHOLE_GUARDIAN_SET_INDEX, [
       GUARDIAN_PRIVATE_KEY,
     ]);
@@ -161,7 +161,7 @@ describe("What token bridge Test", () => {
 
       {
         const receipt = await avaxWormWhatToken
-          .approve(avaxWhatTokenBrigde.address, localVariables.amount)
+          .approve(avaxWhatTokenBridge.address, localVariables.amount)
           .then((tx: ethers.ContractTransaction) => tx.wait())
           .catch((msg: any) => {
             console.log(msg);
@@ -170,7 +170,7 @@ describe("What token bridge Test", () => {
         expect(receipt).is.not.null;
       }
 
-      const receipt = await avaxWhatTokenBrigde
+      const receipt = await avaxWhatTokenBridge
         .lockAndSend("0x" + tryNativeToHexString(ethWallet.address, CHAIN_ID_AVAX)
         , localVariables.amount)
         .then((tx: ethers.ContractTransaction) => tx.wait())
@@ -195,10 +195,10 @@ describe("What token bridge Test", () => {
     it("Should Receive Transfer Message on ETH", async () => {
 
       const amount = 1_000_000;
-      //transfer token to brigde
+      //transfer token to bridge
       {
         const receipt = await ethWormWhatToken
-          .transfer(ethWhatTokenBrigde.address, amount)
+          .transfer(ethWhatTokenBridge.address, amount)
           .then((tx: ethers.ContractTransaction) => tx.wait())
           .catch((msg: any) => {
             console.log(msg);
@@ -207,7 +207,7 @@ describe("What token bridge Test", () => {
         expect(receipt).is.not.null;
       }
 
-      const receipt = await ethWhatTokenBrigde
+      const receipt = await ethWhatTokenBridge
         .redeemAndUnlock(localVariables.signedTransferMessage)
         .then((tx: ethers.ContractTransaction) => tx.wait())
         .catch((msg: any) => {
@@ -221,14 +221,14 @@ describe("What token bridge Test", () => {
         localVariables.signedTransferMessage
       );
 
-      const storedMessage = await ethWhatTokenBrigde.getReceivedMessage(
+      const storedMessage = await ethWhatTokenBridge.getReceivedMessage(
         parsedVerifiedMessage.hash
       );
       expect(storedMessage.recipient).to.equal(localVariables.recipientAddress);
       expect(storedMessage.amount.toNumber()).to.equal(localVariables.amount);
 
       // confirm that the contract marked the message as "consumed"
-      const isMessageConsumed = await ethWhatTokenBrigde.isMessageConsumed(
+      const isMessageConsumed = await ethWhatTokenBridge.isMessageConsumed(
         parsedVerifiedMessage.hash
       );
       expect(isMessageConsumed).to.be.true;

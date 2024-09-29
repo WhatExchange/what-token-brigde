@@ -38,7 +38,7 @@ forge script forge-scripts/deploy_wormUSD.sol \
     --private-key $PRIVATE_KEY \
     --broadcast --slow > forge-scripts/deploy.out 2>&1
 
-forge script forge-scripts/deploy_what_token_brigde.sol \
+forge script forge-scripts/deploy_what_token_bridge.sol \
     --rpc-url $AVAX_RPC \
     --private-key $PRIVATE_KEY \
     --broadcast --slow > forge-scripts/deploy.out 2>&1
@@ -53,7 +53,7 @@ forge script forge-scripts/deploy_wormUSD.sol \
     --private-key $PRIVATE_KEY \
     --broadcast --slow > forge-scripts/deploy.out 2>&1
 
-forge script forge-scripts/deploy_what_token_brigde.sol \
+forge script forge-scripts/deploy_what_token_bridge.sol \
     --rpc-url $ETH_RPC \
     --private-key $PRIVATE_KEY \
     --broadcast --slow > forge-scripts/deploy.out 2>&1

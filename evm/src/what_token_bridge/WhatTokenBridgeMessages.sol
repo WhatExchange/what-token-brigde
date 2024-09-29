@@ -3,9 +3,9 @@ pragma solidity ^0.8.19;
 
 import "modules/utils/BytesLib.sol";
 
-import "./WhatTokenBrigdeStructs.sol";
+import "./WhatTokenBridgeStructs.sol";
 
-contract WhatTokenBrigdeMessages is WhatTokenBrigdeStructs {
+contract WhatTokenBridgeMessages is WhatTokenBridgeStructs {
     using BytesLib for bytes;
 
     function encodeMessage(

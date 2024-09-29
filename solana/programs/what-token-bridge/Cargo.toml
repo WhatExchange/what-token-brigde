@@ -1,7 +1,7 @@
 [package]
 name = "what-token-bridge"
 version = "0.1.0"
-description = "Brigde token WHAT between Solana and Base"
+description = "Bridge token WHAT between Solana and Base"
 edition = "2021"
 
 [lib]

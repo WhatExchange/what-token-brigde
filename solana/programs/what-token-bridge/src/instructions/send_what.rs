@@ -9,7 +9,7 @@ use wormhole_anchor_sdk::wormhole::{self, program::Wormhole};
 use crate::{
     constants::{SEED_PREFIX_CONFIG, SEED_PREFIX_MESSAGE},
     helper::{compute_adjusted_amount, get_transfer_fee, transfer_token_to_pool},
-    ConfigAccount, WhatTokenBridgeMessage, WhatTokenBrigdeError,
+    ConfigAccount, WhatTokenBridgeMessage, WhatTokenBridgeError,
 };
 pub type EvmAddress = [u8; 20];
 
@@ -26,7 +26,7 @@ pub struct LockAndSend<'info> {
     pub what_mint: Box<InterfaceAccount<'info, Mint>>,
     #[account(
         mut,
-        constraint = config_account.what_mint == what_mint.key() @ WhatTokenBrigdeError::InvalidMint
+        constraint = config_account.what_mint == what_mint.key() @ WhatTokenBridgeError::InvalidMint
     )]
     pub config_account: Box<Account<'info, ConfigAccount>>,
 

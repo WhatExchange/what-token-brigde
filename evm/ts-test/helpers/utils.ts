@@ -21,10 +21,10 @@ export function readWormUSDContractAddress(chain: ChainId): string {
   ).transactions[0].contractAddress;
 }
 
-export function readWhatTokenBrigdeContractAddress(chain: ChainId): string {
+export function readWhatTokenBridgeContractAddress(chain: ChainId): string {
   return JSON.parse(
     fs.readFileSync(
-      `${__dirname}/../../broadcast/deploy_what_token_brigde.sol/${chain}/run-latest.json`,
+      `${__dirname}/../../broadcast/deploy_what_token_bridge.sol/${chain}/run-latest.json`,
       "utf-8"
     )
   ).transactions[0].contractAddress;

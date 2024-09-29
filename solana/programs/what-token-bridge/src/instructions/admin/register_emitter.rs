@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use wormhole_anchor_sdk::wormhole;
 
-use crate::{ConfigAccount, ForeignEmitter, WhatTokenBrigdeError};
+use crate::{ConfigAccount, ForeignEmitter, WhatTokenBridgeError};
 
 #[derive(Accounts)]
 #[instruction(chain: u16)]
@@ -10,7 +10,7 @@ pub struct RegisterEmitter<'info> {
     pub owner: Signer<'info>,
     #[account(
       mut,
-      constraint = config_account.owner == *owner.key  @ WhatTokenBrigdeError::Unauthorized
+      constraint = config_account.owner == *owner.key  @ WhatTokenBridgeError::Unauthorized
     )]
     pub config_account: Account<'info, ConfigAccount>,
 
@@ -36,7 +36,7 @@ pub fn register_emitter(
 ) -> Result<()> {
     require!(
         chain > 0 && chain != wormhole::CHAIN_ID_SOLANA && !address.iter().all(|&x| x == 0),
-        WhatTokenBrigdeError::InvalidForeignEmitter,
+        WhatTokenBridgeError::InvalidForeignEmitter,
     );
 
     let emitter = &mut ctx.accounts.foreign_emitter;
