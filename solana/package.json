@@ -1,7 +1,9 @@
 {
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "deploy": "anchor deploy --program-name what_token_bridge --provider.cluster https://api.devnet.solana.com",
+    "initialize": "npx ts-node scripts/index.ts"
   },
   "dependencies": {
     "@certusone/wormhole-sdk": "^0.9.14",

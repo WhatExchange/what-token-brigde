@@ -12,7 +12,7 @@ use instructions::*;
 use message::*;
 use state::*;
 
-declare_id!("3jpFhHiErPVYLUJs6UwgSXmJvgjVtGgiZYrBb8Y3bvQG");
+declare_id!("AB1QecYs3nwFMirGnw7NPsY43RRs8vZ57LWpuaAApCJx");
 
 #[program]
 pub mod what_token_bridge {
@@ -24,13 +24,8 @@ pub mod what_token_bridge {
         Ok(())
     }
 
-    pub fn update_config(
-        ctx: Context<UpdateConfig>,
-        fee: Option<u64>,
-        new_owner: Option<Pubkey>,
-        whitelist_enabled: Option<bool>,
-    ) -> Result<()> {
-        instructions::update_config(ctx, fee, new_owner, whitelist_enabled)?;
+    pub fn update_config(ctx: Context<UpdateConfig>, args: UpdateConfigArgs) -> Result<()> {
+        instructions::update_config(ctx, args)?;
         Ok(())
     }
 

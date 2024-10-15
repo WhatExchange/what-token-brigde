@@ -23,6 +23,7 @@ pub struct ConfigAccount {
     pub wormhole: WormholeAddresses,
     pub bump: u8,
     pub fee: u64,
+    pub sequence: u64,
     pub what_mint: Pubkey,
     pub whitelist_enabled: bool,
     pub whitelists: Vec<Pubkey>,
@@ -32,6 +33,7 @@ pub struct ConfigAccount {
 impl ConfigAccount {
     pub const LEN: usize = 8
         + 32 
+        + 8
         + WormholeAddresses::LEN
         + 1  
         + 4  

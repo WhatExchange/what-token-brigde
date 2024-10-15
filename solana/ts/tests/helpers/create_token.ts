@@ -14,7 +14,7 @@ import {
 } from '@solana/spl-token';
 import { Program, Provider } from '@coral-xyz/anchor';
 
-export async function createTransferHookToken(provider: Provider, wallet: anchor.Wallet, decimals: number): Promise<PublicKey> {
+export async function createTransferFeeConfigToken(provider: Provider, wallet: anchor.Wallet, decimals: number): Promise<PublicKey> {
   const mint = new Keypair();
 
   const extensions = [ExtensionType.TransferFeeConfig];

@@ -16,7 +16,7 @@ import {
   PAYER_KEYPAIR,
   CORE_BRIDGE_PID,
 } from "./helpers";
-import { createTransferHookToken, mintTransferHookTokenTo } from "./helpers/create_token";
+import { createTransferFeeConfigToken, mintTransferHookTokenTo } from "./helpers/create_token";
 import { createUserWithLamports, postSignedMsgAsVaaOnSolana, publishAndSign } from "./helpers/helper";
 import { getOrCreateAssociatedTokenAccount, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
@@ -41,7 +41,7 @@ describe("What token bridge", function () {
 
   async function instantiate() {
 
-    const whatMint = await createTransferHookToken(provider, wallet, whatMintDecimals);
+    const whatMint = await createTransferFeeConfigToken(provider, wallet, whatMintDecimals);
 
     const program = new WhatTokenBridge(
       connection,
@@ -99,15 +99,12 @@ describe("What token bridge", function () {
     expect(emitterData.address.toString()).to.equal(realForeignEmitterAddress.toString());
   });
 
-  it("should send what token through bridge", async function () {
+  it("should send what token through bridge from user", async function () {
     //Send token to user 
     const mintAmount = 1000 * 10 ** whatMintDecimals;
     await mintTransferHookTokenTo(provider, wallet, user.publicKey, whatMint, mintAmount);
     await mintTransferHookTokenTo(provider, wallet, recipient.publicKey, whatMint, mintAmount);
     await mintTransferHookTokenTo(provider, wallet, whatTokenBridgeProgram.configPDA, whatMint, 1_000_000 * 10 ** whatMintDecimals);
-
-    //Send token to bridge
-    const recipientChain = 84532;
 
     const recipientAddress = "0x" + "00123456".repeat(5);
 
@@ -115,8 +112,20 @@ describe("What token bridge", function () {
 
     const sendAmount = 100 * 10 ** whatMintDecimals;
 
-    const tx = await whatTokenBridgeProgram.lockAndSend(user.publicKey, sendAmount, recipientAddress, recipientChain);
-    await sendAndConfirmTransaction(connection, tx, [user], { skipPreflight: true, commitment: 'confirmed' });
+    const tx = await whatTokenBridgeProgram.lockAndSend(user.publicKey, sendAmount, recipientAddress);
+    await sendAndConfirmTransaction(connection, tx, [user]);
+  });
+
+  it("should send what token again", async function () {
+
+    const recipientAddress = "0x" + "00123456".repeat(5);
+
+    await getOrCreateAssociatedTokenAccount(provider.connection, user, whatMint, user.publicKey, true, 'confirmed', {}, TOKEN_2022_PROGRAM_ID, ASSOCIATED_PROGRAM_ID);
+
+    const sendAmount = 100 * 10 ** whatMintDecimals;
+
+    const tx = await whatTokenBridgeProgram.lockAndSend(user.publicKey, sendAmount, recipientAddress);
+    await sendAndConfirmTransaction(connection, tx, [user]);
   });
 
   it("should update config with enabled whitelist = true", async function () {
@@ -128,7 +137,6 @@ describe("What token bridge", function () {
   });
 
   it("should redeem what token with valid vaa", async function () {
-
     const realEmitter = new mock.MockEmitter(
       realForeignEmitterAddress.toString("hex"),
       realForeignEmitterChain

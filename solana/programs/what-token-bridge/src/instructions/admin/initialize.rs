@@ -10,7 +10,7 @@ pub struct Initialize<'info> {
     #[account(mut)]
     pub what_mint: InterfaceAccount<'info, Mint>,
     #[account(
-        init_if_needed,
+        init,
         payer = owner,
         space = ConfigAccount::LEN,
         seeds = [SEED_PREFIX_CONFIG],
@@ -34,6 +34,7 @@ pub fn initialize(ctx: Context<Initialize>, fee: u64) -> Result<()> {
     config_account.bump = ctx.bumps.config_account;
     config_account.what_mint = ctx.accounts.what_mint.key();
     config_account.fee = fee;
+    config_account.sequence = 0;
 
     emit!(InitializedEvent {
         owner: config_account.owner,

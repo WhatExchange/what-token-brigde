@@ -9,7 +9,7 @@ use wormhole_anchor_sdk::wormhole::{self, program::Wormhole};
 use crate::{
     constants::{SEED_PREFIX_CONFIG, SEED_PREFIX_MESSAGE},
     helper::{compute_adjusted_amount, get_transfer_fee, transfer_token_to_pool},
-    ConfigAccount, WhatTokenBridgeMessage, WhatTokenBridgeError,
+    ConfigAccount, WhatTokenBridgeError, WhatTokenBridgeMessage,
 };
 pub type EvmAddress = [u8; 20];
 
@@ -38,7 +38,7 @@ pub struct LockAndSend<'info> {
 
     #[account(
         mut,
-        seeds = [SEED_PREFIX_MESSAGE],
+        seeds = [SEED_PREFIX_MESSAGE, &(config_account.sequence + 1).to_le_bytes()],
         bump,
       )]
     /// CHECK: initialized and written to by wormhole core bridge
@@ -81,7 +81,7 @@ pub struct SendWhatEvent {
 }
 
 pub fn lock_and_send(ctx: Context<LockAndSend>, amount: u64, recipient: &EvmAddress) -> Result<()> {
-    let config_account = &mut *ctx.accounts.config_account;
+    let config_account = &mut ctx.accounts.config_account;
 
     let adjust_amount = compute_adjusted_amount(config_account, &ctx.accounts.user.key(), amount)?;
 
@@ -96,8 +96,7 @@ pub fn lock_and_send(ctx: Context<LockAndSend>, amount: u64, recipient: &EvmAddr
         adjust_amount,
     )?;
 
-    let amount_transfer_fee = get_transfer_fee(ctx.accounts.what_mint.clone(), amount ).unwrap();
-
+    let amount_transfer_fee = get_transfer_fee(ctx.accounts.what_mint.clone(), amount).unwrap();
 
     //transfer Wormhole fee to fee collector account if nessesary
     if ctx.accounts.wormhole_bridge.fee() > 0 {
@@ -139,13 +138,19 @@ pub fn lock_and_send(ctx: Context<LockAndSend>, amount: u64, recipient: &EvmAddr
             },
             &[
                 &[SEED_PREFIX_CONFIG, &[ctx.accounts.config_account.bump]],
-                &[SEED_PREFIX_MESSAGE, &[message_bump]],
+                &[
+                    SEED_PREFIX_MESSAGE,
+                    &(ctx.accounts.config_account.sequence + 1).to_le_bytes(),
+                    &[message_bump],
+                ],
             ],
         ),
         0,
         payload,
         wormhole::Finality::Finalized,
     )?;
+
+    ctx.accounts.config_account.sequence += 1;
 
     emit!(SendWhatEvent {
         user: *ctx.accounts.user.key,

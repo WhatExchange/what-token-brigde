@@ -8,7 +8,7 @@ pub struct UpdateConfig<'info> {
     pub owner: Signer<'info>,
     #[account(
         mut,
-        constraint = config_account.owner == *owner.key  @ WhatTokenBridgeError::Unauthorized
+        constraint = config_account.owner == *owner.key @ WhatTokenBridgeError::Unauthorized
     )]
     pub config_account: Account<'info, ConfigAccount>,
 
@@ -22,25 +22,31 @@ pub struct UpdateConfigEvent {
     pub new_whitelist_enabled: Option<bool>,
 }
 
-pub fn update_config(ctx: Context<UpdateConfig>, fee: Option<u64>, new_owner: Option<Pubkey>, whitelist_enabled: Option<bool>) -> Result<()> {
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct UpdateConfigArgs {
+    pub new_fee: Option<u64>,
+    pub new_owner: Option<Pubkey>,
+    pub whitelist_enabled: Option<bool>,
+}
+
+pub fn update_config(ctx: Context<UpdateConfig>, args: UpdateConfigArgs) -> Result<()> {
     let config_account = &mut ctx.accounts.config_account;
 
-    if let Some(fee) = fee {
+    if let Some(fee) = args.new_fee {
         config_account.fee = fee;
     }
 
-    if let Some(new_owner) = new_owner {
+    if let Some(new_owner) = args.new_owner {
         config_account.owner = new_owner;
-    } 
-
-    if let Some(whitelist_enabled) = whitelist_enabled {
-        config_account.whitelist_enabled = whitelist_enabled;
     }
 
+    if let Some(whitelist_enabled) = args.whitelist_enabled {
+        config_account.whitelist_enabled = whitelist_enabled;
+    }
     emit!(UpdateConfigEvent {
-        new_owner: Some(config_account.owner),
-        new_fee: Some(config_account.fee),
-        new_whitelist_enabled: Some(config_account.whitelist_enabled),
+        new_owner: args.new_owner,
+        new_fee: args.new_fee,
+        new_whitelist_enabled: args.whitelist_enabled,
     });
 
     Ok(())
