@@ -1,11 +1,14 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::Mint;
 
-use crate::{constants::SEED_PREFIX_CONFIG, ConfigAccount};
+use crate::{constants::SEED_PREFIX_CONFIG, ConfigAccount, WhatTokenBridgeError};
+
+const OWNER: Pubkey = pubkey!("88gQv9Y9u6HWWMmne7mKRTTCAhmPpm91Ds8JeFJs8wAp");
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(mut)]
+    #[account(mut,
+    constraint = owner.key() == OWNER @WhatTokenBridgeError::Unauthorized)]
     pub owner: Signer<'info>,
     #[account(mut)]
     pub what_mint: InterfaceAccount<'info, Mint>,
