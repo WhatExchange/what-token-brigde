@@ -15,4 +15,10 @@ If your xChain app will require Solana programs, prepare your development enviro
 
 Anchor helps in abstracting solana architecture boilerplate code. However, it has its own challenges so you can still write programs in native rust, download ['rust-analyzer'](https://rust-analyzer.github.io/) to debug and write efficient rust.
 #### Testing
-``` anchor test ```
+
+1. Run command ```solana address``` to get your address
+2. Replace your address  at file ***initialize.rs*** by your address
+```
+const OWNER: Pubkey = pubkey!("YOUR ADDRESS");
+```
+3. ``` anchor test -- --features mainnet``` (Wormhole using mainnet same as localnet)
