@@ -54,7 +54,11 @@ pub struct RedeemWhat<'info> {
     #[account(mut)]
     pub vault_token_account: InterfaceAccount<'info, TokenAccount>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = recipient_token_account.owner == recipient.key() @ WhatTokenBridgeError::InvalidTokenOwner,
+        constraint = recipient_token_account.mint == what_mint.key() @ WhatTokenBridgeError::InvalidMint
+    )]
     pub recipient_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
