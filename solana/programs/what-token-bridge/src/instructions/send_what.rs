@@ -30,7 +30,11 @@ pub struct LockAndSend<'info> {
     )]
     pub config_account: Box<Account<'info, ConfigAccount>>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = vault_token_account.owner == config_account.key() @ WhatTokenBridgeError::InvalidTokenOwner,
+        constraint = vault_token_account.mint == what_mint.key() @ WhatTokenBridgeError::InvalidMint
+    )]
     pub vault_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(mut)]

@@ -8,6 +8,9 @@ pub enum WhatTokenBridgeError {
     #[msg("InvalidMint")]
     InvalidMint,
 
+    #[msg("Invalid token owner")]
+    InvalidTokenOwner,
+
     #[msg("InvalidWormholeBridge")]
     InvalidWormholeBridge,
 
