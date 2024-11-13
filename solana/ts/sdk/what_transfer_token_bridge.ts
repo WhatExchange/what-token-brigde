@@ -129,7 +129,8 @@ export class WhatTokenBridge {
   public deriveReceivedKey(
     programId: PublicKeyInitData,
     chain: ChainId,
-    sequence: bigint
+    sequence: bigint,
+    emitterAddress: Buffer
   ) {
     return deriveAddress(
       [
@@ -140,6 +141,7 @@ export class WhatTokenBridge {
           buf.writeBigInt64LE(sequence, 2);
           return buf;
         })(),
+        emitterAddress
       ],
       programId
     );
@@ -347,7 +349,8 @@ export class WhatTokenBridge {
         received: this.deriveReceivedKey(
           this.program.programId,
           parsed.emitterChain as ChainId,
-          parsed.sequence
+          parsed.sequence,
+          parsed.emitterAddress
         ),
         foreignEmitter: this.deriveForeignEmitterKey(
           this.program.programId,

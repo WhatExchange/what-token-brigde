@@ -67,8 +67,9 @@ pub struct RedeemWhat<'info> {
         seeds = [
             Received::SEED_PREFIX,
             &posted.emitter_chain().to_le_bytes()[..],
-            &posted.sequence().to_le_bytes()[..]
-        ],
+            &posted.sequence().to_le_bytes()[..],
+            &posted.emitter_address()[..]
+            ],
         bump,
         space = Received::MAXIMUM_SIZE
     )]
