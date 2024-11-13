@@ -24,6 +24,16 @@ pub mod what_token_bridge {
         Ok(())
     }
 
+    pub fn transfer_ownership(ctx: Context<TransferOwnership>, new_owner_candidate: Pubkey) -> Result<()> {
+        instructions::transfer_ownership(ctx, new_owner_candidate)?;
+        Ok(())
+    }
+
+    pub fn confirm_ownership_transfer(ctx: Context<ConfirmOwnershipTransfer>) -> Result<()> {
+        instructions::confirm_ownership_transfer(ctx)?;
+        Ok(())
+    }
+
     pub fn update_config(ctx: Context<UpdateConfig>, args: UpdateConfigArgs) -> Result<()> {
         instructions::update_config(ctx, args)?;
         Ok(())

@@ -5,6 +5,9 @@ pub enum WhatTokenBridgeError {
     #[msg("Unauthorized")]
     Unauthorized,
 
+    #[msg("Invalid owner candidate")]
+    InvalidOwnerCandidate,
+
     #[msg("InvalidMint")]
     InvalidMint,
 

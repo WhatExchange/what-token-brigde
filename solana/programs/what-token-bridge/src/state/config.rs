@@ -20,6 +20,7 @@ impl WormholeAddresses {
 #[derive(Default)]
 pub struct ConfigAccount {
     pub owner: Pubkey,
+    pub owner_candidate: Pubkey,
     pub wormhole: WormholeAddresses,
     pub bump: u8,
     pub fee: u64,
@@ -33,6 +34,7 @@ pub struct ConfigAccount {
 impl ConfigAccount {
     pub const LEN: usize = 8
         + 32 
+        + 32
         + 8
         + WormholeAddresses::LEN
         + 1  

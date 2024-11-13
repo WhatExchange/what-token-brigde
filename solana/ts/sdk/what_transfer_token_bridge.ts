@@ -141,7 +141,7 @@ export class WhatTokenBridge {
           buf.writeBigInt64LE(sequence, 2);
           return buf;
         })(),
-        emitterAddress
+        emitterAddress,
       ],
       programId
     );
@@ -181,17 +181,44 @@ export class WhatTokenBridge {
   public async updateConfig(
     owner: PublicKey,
     newFee: BN | null,
-    newOwner: PublicKey | null,
-    whitelistEnabled: boolean | null,
-    
+    whitelistEnabled: boolean | null
   ): Promise<Transaction> {
     const tx = await this.program.methods
       .updateConfig({
-        newFee, newOwner, whitelistEnabled,
-
+        newFee,
+        whitelistEnabled,
       })
       .accountsPartial({
         owner: owner,
+        configAccount: this.configPDA,
+      })
+      .transaction();
+
+    return tx;
+  }
+
+  public async transferOwnership(
+    owner: PublicKey,
+    newOwnerCandidate: PublicKey
+  ): Promise<Transaction> {
+    const tx = await this.program.methods
+      .transferOwnership(newOwnerCandidate)
+      .accountsPartial({
+        owner: owner,
+        configAccount: this.configPDA,
+      })
+      .transaction();
+
+    return tx;
+  }
+
+  public async confirmOwnershipTransfer(
+    ownerCandidate: PublicKey
+  ): Promise<Transaction> {
+    const tx = await this.program.methods
+      .confirmOwnershipTransfer()
+      .accountsPartial({
+        ownerCandidate: ownerCandidate,
         configAccount: this.configPDA,
       })
       .transaction();
