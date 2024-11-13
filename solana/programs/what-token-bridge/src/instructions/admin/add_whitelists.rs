@@ -10,9 +10,7 @@ pub struct AddWhitelists<'info> {
     )]
     pub owner: Signer<'info>,
     #[account(
-        init_if_needed,
-        payer = owner,
-        space = ConfigAccount::LEN,
+        mut,
         seeds = [SEED_PREFIX_CONFIG],
         bump,
     )]
