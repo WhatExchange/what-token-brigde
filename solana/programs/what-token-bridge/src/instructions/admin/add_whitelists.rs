@@ -19,15 +19,27 @@ pub struct AddWhitelists<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[event]
+pub struct WhitelistAddedEvent {
+    pub owner: Pubkey,
+    pub added_whitelists: Vec<Pubkey>,
+}
+
 pub fn add_whitelists(ctx: Context<AddWhitelists>, whitelists: Vec<Pubkey>) -> Result<()> {
     let config_account = &mut ctx.accounts.config_account;
+    let mut added_whitelists = Vec::new();
 
     for whitelist in whitelists.iter() {
         if !config_account.whitelists.contains(whitelist) {
             config_account.whitelists.push(*whitelist);
-
+            added_whitelists.push(*whitelist);
         }
     }
+
+    emit!(WhitelistAddedEvent {
+        owner: *ctx.accounts.owner.key,
+        added_whitelists,
+    });
 
     Ok(())
 }

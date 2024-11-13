@@ -29,6 +29,12 @@ pub struct RegisterEmitter<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[event]
+pub struct EmitterRegisteredEvent {
+    pub chain: u16,
+    pub address: [u8; 32],
+}
+
 pub fn register_emitter(
     ctx: Context<RegisterEmitter>,
     chain: u16,
@@ -42,6 +48,8 @@ pub fn register_emitter(
     let emitter = &mut ctx.accounts.foreign_emitter;
     emitter.chain = chain;
     emitter.address = address;
+
+    emit!(EmitterRegisteredEvent { chain, address });
 
     Ok(())
 }
