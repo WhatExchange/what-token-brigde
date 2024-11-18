@@ -2,15 +2,20 @@
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-    "deploy": "anchor deploy --program-name what_token_bridge --provider.cluster https://api.devnet.solana.com",
-    "initialize": "npx ts-node scripts/index.ts"
+    "deploy-token": "npx ts-node scripts/deploy_what_token.ts",
+    "deploy-bridge": "anchor deploy --program-name what_token_bridge --provider.cluster https://api.devnet.solana.com",
+    "setup-bridge": "npx ts-node scripts/setup_what_token_bridge.ts",
+    "send-what": "npx ts-node scripts/send_what_token.ts",
+    "mint-what": "npx ts-node scripts/mint_what_token.ts"
+
   },
   "dependencies": {
     "@certusone/wormhole-sdk": "^0.9.14",
+    "@coral-xyz/anchor": "^0.30.1",
     "@metaplex-foundation/js": "^0.18.3",
     "@metaplex-foundation/mpl-token-metadata": "^2.9.0",
-    "@coral-xyz/anchor": "^0.30.1",
     "@solana/spl-token": "^0.3.7",
+    "bs58": "^6.0.0",
     "ethers": "^5.7.2"
   },
   "devDependencies": {

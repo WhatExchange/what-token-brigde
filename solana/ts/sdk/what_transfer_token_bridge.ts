@@ -308,6 +308,7 @@ export class WhatTokenBridge {
         unused,
         unused
       );
+      console.log('wormholeBridge: ', wormholeBridge)
 
       return {
         wormholeBridge,

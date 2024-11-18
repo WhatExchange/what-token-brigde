@@ -12,7 +12,7 @@ use instructions::*;
 use message::*;
 use state::*;
 
-declare_id!("AB1QecYs3nwFMirGnw7NPsY43RRs8vZ57LWpuaAApCJx");
+declare_id!("HrFWbfu6sL8NYTmMKxUM99BFb8PUwqoCeoE6ti7fBCRg");
 
 #[program]
 pub mod what_token_bridge {

@@ -49,8 +49,8 @@ describe("What token bridge", function () {
 
   async function instantiate() {
     const whatMint = await createTransferFeeConfigToken(
-      provider,
-      wallet,
+      connection,
+      wallet.payer,
       whatMintDecimals
     );
 
@@ -137,22 +137,22 @@ describe("What token bridge", function () {
     //Send token to user
     const mintAmount = 1000 * 10 ** whatMintDecimals;
     await mintTransferHookTokenTo(
-      provider,
-      wallet,
+      connection,
+      wallet.payer,
       user.publicKey,
       whatMint,
       mintAmount
     );
     await mintTransferHookTokenTo(
-      provider,
-      wallet,
+      connection,
+      wallet.payer,
       recipient.publicKey,
       whatMint,
       mintAmount
     );
     await mintTransferHookTokenTo(
-      provider,
-      wallet,
+      connection,
+      wallet.payer,
       whatTokenBridgeProgram.configPDA,
       whatMint,
       1_000_000 * 10 ** whatMintDecimals
@@ -248,19 +248,28 @@ describe("What token bridge", function () {
       wallet.publicKey,
       newOwnerCandidate.publicKey
     );
-    await sendAndConfirmTransaction(connection, transferOwnershipTx, [wallet.payer]);
+    await sendAndConfirmTransaction(connection, transferOwnershipTx, [
+      wallet.payer,
+    ]);
 
     const config = await whatTokenBridgeProgram.getConfigData();
-    expect(config.ownerCandidate.toString()).to.equal(newOwnerCandidate.publicKey.toString());
+    expect(config.ownerCandidate.toString()).to.equal(
+      newOwnerCandidate.publicKey.toString()
+    );
   });
 
   it("should confirm ownership transfer", async function () {
-    const confirmOwnershipTranfer = await whatTokenBridgeProgram.confirmOwnershipTransfer(
-      newOwnerCandidate.publicKey
-    );
-    await sendAndConfirmTransaction(connection, confirmOwnershipTranfer, [newOwnerCandidate]);
+    const confirmOwnershipTranfer =
+      await whatTokenBridgeProgram.confirmOwnershipTransfer(
+        newOwnerCandidate.publicKey
+      );
+    await sendAndConfirmTransaction(connection, confirmOwnershipTranfer, [
+      newOwnerCandidate,
+    ]);
 
     const config = await whatTokenBridgeProgram.getConfigData();
-    expect(config.owner.toString()).to.equal(newOwnerCandidate.publicKey.toString());
+    expect(config.owner.toString()).to.equal(
+      newOwnerCandidate.publicKey.toString()
+    );
   });
 });

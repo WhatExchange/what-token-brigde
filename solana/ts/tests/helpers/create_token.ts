@@ -1,6 +1,11 @@
-import * as anchor from '@coral-xyz/anchor';
-
-import { Keypair, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   ExtensionType,
@@ -11,15 +16,18 @@ import {
   createMintToInstruction,
   getAssociatedTokenAddressSync,
   getMintLen,
-} from '@solana/spl-token';
-import { Program, Provider } from '@coral-xyz/anchor';
+} from "@solana/spl-token";
 
-export async function createTransferFeeConfigToken(provider: Provider, wallet: anchor.Wallet, decimals: number): Promise<PublicKey> {
+export async function createTransferFeeConfigToken(
+  connection: Connection,
+  wallet: Keypair,
+  decimals: number
+): Promise<PublicKey> {
   const mint = new Keypair();
 
   const extensions = [ExtensionType.TransferFeeConfig];
   const mintLen = getMintLen(extensions);
-  const lamports = await provider.connection.getMinimumBalanceForRentExemption(mintLen);
+  const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
 
   const transaction = new Transaction().add(
     SystemProgram.createAccount({
@@ -35,23 +43,38 @@ export async function createTransferFeeConfigToken(provider: Provider, wallet: a
       wallet.publicKey,
       0,
       BigInt(0),
-      TOKEN_2022_PROGRAM_ID,
+      TOKEN_2022_PROGRAM_ID
     ),
-    createInitializeMintInstruction(mint.publicKey, decimals, wallet.publicKey, null, TOKEN_2022_PROGRAM_ID),
+    createInitializeMintInstruction(
+      mint.publicKey,
+      decimals,
+      wallet.publicKey,
+      null,
+      TOKEN_2022_PROGRAM_ID
+    )
   );
 
-  await sendAndConfirmTransaction(provider.connection, transaction, [wallet.payer, mint], { skipPreflight: true, commitment: 'confirmed' });
+  await sendAndConfirmTransaction(connection, transaction, [wallet, mint], {
+    skipPreflight: true,
+    commitment: "confirmed",
+  });
 
   return mint.publicKey;
 }
 
-export async function mintTransferHookTokenTo(provider: Provider, wallet: anchor.Wallet, recipient: PublicKey, mint: PublicKey, amount: number): Promise<String> {
+export async function mintTransferHookTokenTo(
+  connection: Connection,
+  wallet: Keypair,
+  recipient: PublicKey,
+  mint: PublicKey,
+  amount: number
+): Promise<String> {
   const destinationTokenAccount = getAssociatedTokenAddressSync(
     mint,
     recipient,
     true,
     TOKEN_2022_PROGRAM_ID,
-    ASSOCIATED_TOKEN_PROGRAM_ID,
+    ASSOCIATED_TOKEN_PROGRAM_ID
   );
 
   const transaction = new Transaction().add(
@@ -61,13 +84,24 @@ export async function mintTransferHookTokenTo(provider: Provider, wallet: anchor
       recipient,
       mint,
       TOKEN_2022_PROGRAM_ID,
-      ASSOCIATED_TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
     ),
-    createMintToInstruction(mint, destinationTokenAccount, wallet.publicKey, amount, [], TOKEN_2022_PROGRAM_ID),
+    createMintToInstruction(
+      mint,
+      destinationTokenAccount,
+      wallet.publicKey,
+      amount,
+      [],
+      TOKEN_2022_PROGRAM_ID
+    )
   );
 
-  const txSig = await sendAndConfirmTransaction(provider.connection, transaction, [wallet.payer], { skipPreflight: true });
+  const txSig = await sendAndConfirmTransaction(
+    connection,
+    transaction,
+    [wallet],
+    { skipPreflight: true }
+  );
 
-  return txSig
-
+  return txSig;
 }

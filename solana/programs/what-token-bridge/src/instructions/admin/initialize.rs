@@ -3,7 +3,7 @@ use anchor_spl::token_interface::Mint;
 
 use crate::{constants::SEED_PREFIX_CONFIG, ConfigAccount, WhatTokenBridgeError};
 
-const OWNER: Pubkey = pubkey!("88gQv9Y9u6HWWMmne7mKRTTCAhmPpm91Ds8JeFJs8wAp");
+const OWNER: Pubkey = pubkey!("Grq8wT5R8LLsi8XgjrD3nicthetWho8pCyTtAAU99g7x");
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
