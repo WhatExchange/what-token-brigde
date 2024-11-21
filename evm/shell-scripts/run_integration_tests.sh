@@ -33,7 +33,7 @@ export TESTING_BRIDGE_ADDRESS=$TESTING_AVAX_BRIDGE_ADDRESS
 
 echo "deploying contracts to Avalanche fork"
 
-forge script forge-scripts/deploy_wormUSD.sol \
+forge script forge-scripts/deploy_what_token.sol \
     --rpc-url $AVAX_RPC \
     --private-key $PRIVATE_KEY \
     --broadcast --slow > forge-scripts/deploy.out 2>&1
@@ -48,7 +48,7 @@ export TESTING_WORMHOLE_ADDRESS=$TESTING_ETH_WORMHOLE_ADDRESS
 export TESTING_BRIDGE_ADDRESS=$TESTING_ETH_BRIDGE_ADDRESS
 
 echo "deploying contracts to Ethereum fork"
-forge script forge-scripts/deploy_wormUSD.sol \
+forge script forge-scripts/deploy_what_token.sol \
     --rpc-url $ETH_RPC \
     --private-key $PRIVATE_KEY \
     --broadcast --slow > forge-scripts/deploy.out 2>&1

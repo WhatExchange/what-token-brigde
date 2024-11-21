@@ -21,7 +21,7 @@ import {
 import {
   formatWormholeMessageFromReceipt,
   readWhatTokenBridgeContractAddress,
-  readWormUSDContractAddress,
+  readWhatTokenContractAddress,
 } from "./helpers/utils";
 import {WhatTokenBridge__factory, IWormhole__factory, IERC20__factory} from "../ethers-contracts";
 
@@ -45,11 +45,11 @@ describe("What token bridge Test", () => {
   );
 
   const avaxWormWhatToken = IERC20__factory.connect(
-    readWormUSDContractAddress(FORK_AVAX_CHAIN_ID as ChainId),
+    readWhatTokenContractAddress(FORK_AVAX_CHAIN_ID as ChainId),
     avaxWallet
   );
   const ethWormWhatToken = IERC20__factory.connect(
-    readWormUSDContractAddress(FORK_ETH_CHAIN_ID as ChainId),
+    readWhatTokenContractAddress(FORK_ETH_CHAIN_ID as ChainId),
     ethWallet
   );
 
@@ -170,6 +170,7 @@ describe("What token bridge Test", () => {
         expect(receipt).is.not.null;
       }
 
+      console.log('"0x" + tryNativeToHexString(ethWallet.address, CHAIN_ID_AVAX; ', "0x" + tryNativeToHexString(ethWallet.address, CHAIN_ID_AVAX));
       const receipt = await avaxWhatTokenBridge
         .lockAndSend("0x" + tryNativeToHexString(ethWallet.address, CHAIN_ID_AVAX)
         , localVariables.amount)

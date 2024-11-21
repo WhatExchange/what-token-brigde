@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "main": "index.js",
   "license": "ISC",
+  "scripts": {
+    "send-what": "npx ts-node scripts/sendToken.ts"
+  },
   "devDependencies": {
     "@types/node": "^18.8.4",
     "@certusone/wormhole-sdk": "0.9",
