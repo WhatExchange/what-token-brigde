@@ -26,11 +26,15 @@ contract ContractScript is Script {
         );
     }
 
+    function setWhatTokenAddress() public {
+        whatTokenBridge.setWhatTokenAddress(vm.envAddress("WHAT_TOKEN_ADDRESS"));
+    }
+
     function run() public {
         vm.startBroadcast();
 
         deployWhatTokenBridge();
-
+        setWhatTokenAddress();
         vm.stopBroadcast();
     }
 }

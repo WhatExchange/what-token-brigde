@@ -20,18 +20,19 @@ contract WhatTokenBridgeMessages is WhatTokenBridgeStructs {
 
     function decodeMessage(
         bytes memory encodedMessage
-    ) public pure returns (TransferMessage memory parsedMessage) {
-        uint256 index = 0;
+        ) public pure returns (TransferMessage memory parsedMessage) {
+            uint256 index = 0;
 
-        parsedMessage.payloadID = encodedMessage.toUint8(index);
-        require(parsedMessage.payloadID == 1, "invalid payloadID");
-        index += 1;
+            parsedMessage.payloadID = encodedMessage.toUint8(index);
+            require(parsedMessage.payloadID == 1, "invalid payloadID");
+            index += 1;
 
-        parsedMessage.recipient = encodedMessage.toBytes32(index);
-        index += 32;
+            parsedMessage.recipient = encodedMessage.toBytes32(index);
+            index += 32;
 
-        parsedMessage.amount = encodedMessage.toUint256(index);
-        index += 32;        
-        require(index == encodedMessage.length, "invalid message length");
-    }
+            parsedMessage.amount = encodedMessage.toUint256(index);
+            index += 32;
+
+            require(index == encodedMessage.length, "invalid message length");
+        }
 }

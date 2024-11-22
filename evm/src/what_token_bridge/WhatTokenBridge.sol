@@ -24,6 +24,34 @@ contract WhatTokenBridge is
     using BytesLib for bytes;
 
     /**
+     * @dev Emitted when tokens are locked and a message is sent via Wormhole.
+     * @param sender The address of the user locking the tokens.
+     * @param recipient The recipient address on the destination chain.
+     * @param amount The amount of tokens locked.
+     * @param messageSequence The sequence number of the Wormhole message.
+     */
+    event TokensLocked(
+        address indexed sender,
+        bytes32 indexed recipient,
+        uint256 amount,
+        uint64 messageSequence
+    );
+
+    /**
+     * @dev Emitted when tokens are redeemed and unlocked.
+     * @param recipient The recipient address on this chain.
+     * @param amount The amount of tokens unlocked.
+     * @param relayer The address of the relayer who redeemed the message.
+     * @param relayerFee The amount of tokens transferred to the relayer as a fee.
+     */
+    event TokensUnlocked(
+        address indexed recipient,
+        uint256 amount,
+        address indexed relayer,
+        uint256 relayerFee
+    );
+
+    /**
      * @notice Initializes the WhatTokenBridge contract.
      * @param wormhole_ Address of the Wormhole contract.
      * @param chainId_ ID of the chain this contract is deployed on.
@@ -76,6 +104,13 @@ contract WhatTokenBridge is
             revert InvalidAmount();
         }
 
+        address whatTokenAddress = whatToken();
+
+        uint8 decimals = _getDecimals(whatTokenAddress);
+
+        // don't deposit dust that can not be bridged due to the decimal shift
+        amount = deNormalizeAmount(normalizeAmount(amount, decimals), decimals);
+
         IWormhole wormhole = wormhole();
         uint256 wormholeFee = wormhole.messageFee();
 
@@ -84,13 +119,15 @@ contract WhatTokenBridge is
         }
 
         // Custody tokens and get the actual amount received after possible fees
-        uint256 amountReceived = custodyTokens(whatToken(), amount);
+        uint256 amountReceived = _custodyTokens(whatToken(), amount);
+
+        uint256 normalizedAmount = normalizeAmount(amountReceived, decimals);
 
         // Create a TransferMessage and encode it for Wormhole transfer
         TransferMessage memory parsedMessage = TransferMessage({
             payloadID: uint8(1),
             recipient: recipient,
-            amount: amountReceived
+            amount: normalizedAmount
         });
 
         bytes memory encodedMessage = encodeMessage(parsedMessage);
@@ -100,6 +137,13 @@ contract WhatTokenBridge is
             0,
             encodedMessage,
             wormholeFinality()
+        );
+
+        emit TokensLocked(
+            msg.sender,
+            recipient,
+            amountReceived,
+            messageSequence
         );
     }
 
@@ -117,7 +161,7 @@ contract WhatTokenBridge is
 
         require(valid, reason);
 
-        if (!verifyEmitter(wormholeMessage)) {
+        if (!_verifyEmitter(wormholeMessage)) {
             revert WrongEmitterAddress();
         }
 
@@ -132,14 +176,21 @@ contract WhatTokenBridge is
         }
 
         // Convert the recipient from bytes32 to address
-        address recipient = bytes32ToAddress(parsedMessage.recipient);
+        address recipient = _bytes32ToAddress(parsedMessage.recipient);
 
-        uint256 amountTransferred = parsedMessage.amount;
+        address whatTokenAddress = whatToken();
+
+        // Get decimals for both chains
+        uint8 decimals = _getDecimals(whatTokenAddress);
+
+        // Adjust amount based on decimal difference
+        uint256 amountTransferred = deNormalizeAmount(
+            parsedMessage.amount,
+            decimals
+        );
 
         // Calculate the fee for the relayer
         uint256 relayerFee = calculateRelayerFee(amountTransferred);
-
-        address whatTokenAddress = whatToken();
 
         if (relayerFee == 0) {
             // Transfer the full amount to the recipient if no relayer fee
@@ -163,12 +214,19 @@ contract WhatTokenBridge is
             );
         }
 
+        emit TokensUnlocked(
+            recipient,
+            amountTransferred,
+            msg.sender,
+            relayerFee
+        );
+
         // Mark the message as consumed to prevent re-use
-        consumeMessage(wormholeMessage.hash, recipient, parsedMessage.amount);
+        consumeMessage(wormholeMessage.hash, recipient, amountTransferred);
     }
 
-   /**
-     * @notice Registers foreign emitters (HelloToken contracts) with this contract
+    /**
+     * @notice Registers foreign emitters with this contract
      * @dev Only the deployer (owner) can invoke this method
      * @param emitterChainId Wormhole chainId of the contract being registered.
      * See https://book.wormhole.com/reference/contracts.html for more information.
@@ -208,11 +266,11 @@ contract WhatTokenBridge is
      * @param amount The amount of tokens to transfer.
      * @return The actual amount of tokens received by the contract.
      */
-    function custodyTokens(
+    function _custodyTokens(
         address token,
         uint256 amount
     ) internal returns (uint256) {
-        uint256 balanceBefore = getBalance(token);
+        uint256 balanceBefore = _getBalance(token);
 
         // Transfer tokens from the sender to the contract
         SafeERC20.safeTransferFrom(
@@ -221,12 +279,13 @@ contract WhatTokenBridge is
             address(this),
             amount
         );
-
         // Return the difference in balance to account for any transfer fees
-        return getBalance(token) - balanceBefore;
+        return _getBalance(token) - balanceBefore;
     }
 
-    function getBalance(address token) internal view returns (uint256 balance) {
+    function _getBalance(
+        address token
+    ) internal view returns (uint256 balance) {
         // Call to retrieve the token balance
         (, bytes memory queriedBalance) = token.staticcall(
             abi.encodeWithSelector(IERC20.balanceOf.selector, address(this))
@@ -239,7 +298,7 @@ contract WhatTokenBridge is
      * @param address_ The address to convert.
      * @return The bytes32 representation of the address.
      */
-    function addressToBytes32(
+    function _addressToBytes32(
         address address_
     ) internal pure returns (bytes32) {
         return bytes32(uint256(uint160(address_)));
@@ -259,7 +318,7 @@ contract WhatTokenBridge is
      * @param address_ The bytes32 address to convert.
      * @return The Ethereum address.
      */
-    function bytes32ToAddress(
+    function _bytes32ToAddress(
         bytes32 address_
     ) internal pure returns (address) {
         if (bytes12(address_) != 0) {
@@ -273,7 +332,7 @@ contract WhatTokenBridge is
      * @param vm The Wormhole VM message.
      * @return True if the emitter is valid, otherwise false.
      */
-    function verifyEmitter(
+    function _verifyEmitter(
         IWormhole.VM memory vm
     ) internal view returns (bool) {
         return getRegisteredEmitter(vm.emitterChainId) == vm.emitterAddress;
@@ -284,11 +343,31 @@ contract WhatTokenBridge is
      * @param token The token contract address.
      * @return The number of decimals used by the token.
      */
-    function getDecimals(address token) internal view returns (uint8) {
+    function _getDecimals(address token) internal view returns (uint8) {
         (, bytes memory queriedDecimals) = token.staticcall(
             abi.encodeWithSignature("decimals()")
         );
         return abi.decode(queriedDecimals, (uint8));
+    }
+
+    function normalizeAmount(
+        uint256 amount,
+        uint8 decimals
+    ) internal pure returns (uint256) {
+        if (decimals > 8) {
+            amount /= 10 ** (decimals - 8);
+        }
+        return amount;
+    }
+
+    function deNormalizeAmount(
+        uint256 amount,
+        uint8 decimals
+    ) internal pure returns (uint256) {
+        if (decimals > 8) {
+            amount *= 10 ** (decimals - 8);
+        }
+        return amount;
     }
 
     /**

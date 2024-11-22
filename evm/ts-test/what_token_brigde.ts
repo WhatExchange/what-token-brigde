@@ -169,8 +169,6 @@ describe("What token bridge Test", () => {
           });
         expect(receipt).is.not.null;
       }
-
-      console.log('"0x" + tryNativeToHexString(ethWallet.address, CHAIN_ID_AVAX; ', "0x" + tryNativeToHexString(ethWallet.address, CHAIN_ID_AVAX));
       const receipt = await avaxWhatTokenBridge
         .lockAndSend("0x" + tryNativeToHexString(ethWallet.address, CHAIN_ID_AVAX)
         , localVariables.amount)
