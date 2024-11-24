@@ -2,34 +2,23 @@ use anchor_lang::{AnchorDeserialize, AnchorSerialize};
 use std::io;
 use wormhole_io::Readable;
 
-const PAYLOAD_ID_SEND: u8 = 0;
-const PAYLOAD_ID_REDEEM: u8 = 1;
+const PAYLOAD_ID_TRANSFER: u8 = 1;
 
 #[derive(Clone)]
 pub enum WhatTokenBridgeMessage {
-    Send {
-        recipient: [u8; 20],
-        amount: [u8; 8],
-    },
-    Redeem {
+    TransferPayload {
         recipient: [u8; 32],
-        amount: u64,
+        amount: [u8; 32],
     },
 }
 
 impl AnchorSerialize for WhatTokenBridgeMessage {
     fn serialize<W: io::Write>(&self, writer: &mut W) -> io::Result<()> {
         match self {
-            WhatTokenBridgeMessage::Send { recipient, amount } => {
-                PAYLOAD_ID_SEND.serialize(writer)?;
+            WhatTokenBridgeMessage::TransferPayload { recipient, amount } => {
+                PAYLOAD_ID_TRANSFER.serialize(writer)?;
                 recipient.serialize(writer)?;
                 amount.serialize(writer)?;
-                Ok(())
-            }
-            WhatTokenBridgeMessage::Redeem { recipient, amount } => {
-                PAYLOAD_ID_REDEEM.serialize(writer)?;
-                recipient.serialize(writer)?;
-                amount.serialize(writer)?; // Serialize the amount as a u64
                 Ok(())
             }
         }
@@ -39,14 +28,15 @@ impl AnchorSerialize for WhatTokenBridgeMessage {
 impl AnchorDeserialize for WhatTokenBridgeMessage {
     fn deserialize_reader<R: io::Read>(reader: &mut R) -> io::Result<Self> {
         match u8::read(reader)? {
-            PAYLOAD_ID_SEND => Ok(WhatTokenBridgeMessage::Send {
-                recipient: <[u8; 20]>::read(reader)?,
-                amount: <[u8; 8]>::read(reader)?,
-            }),
-            PAYLOAD_ID_REDEEM => Ok(WhatTokenBridgeMessage::Redeem {
-                recipient: <[u8; 32]>::read(reader)?,
-                amount: u64::read(reader)?,
-            }),
+            PAYLOAD_ID_TRANSFER => {
+                let recipient = <[u8; 32]>::read(reader)?;
+                let mut amount_bytes = [0u8; 32];
+                reader.read_exact(&mut amount_bytes)?;
+                Ok(WhatTokenBridgeMessage::TransferPayload {
+                    recipient,
+                    amount: amount_bytes,
+                })
+            },
             _ => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "invalid payload ID",

@@ -12,7 +12,7 @@ use instructions::*;
 use message::*;
 use state::*;
 
-declare_id!("AB1QecYs3nwFMirGnw7NPsY43RRs8vZ57LWpuaAApCJx");
+declare_id!("H2A4zRKip3vL652k6sxXtSYRTbnzBrrREvAjPKu7nAr");
 
 #[program]
 pub mod what_token_bridge {
@@ -24,7 +24,10 @@ pub mod what_token_bridge {
         Ok(())
     }
 
-    pub fn transfer_ownership(ctx: Context<TransferOwnership>, new_owner_candidate: Pubkey) -> Result<()> {
+    pub fn transfer_ownership(
+        ctx: Context<TransferOwnership>,
+        new_owner_candidate: Pubkey,
+    ) -> Result<()> {
         instructions::transfer_ownership(ctx, new_owner_candidate)?;
         Ok(())
     }
@@ -51,14 +54,14 @@ pub mod what_token_bridge {
     pub fn lock_and_send(
         ctx: Context<LockAndSend>,
         amount: u64,
-        recipient_address: [u8; 20],
+        recipient_address: [u8; 32],
     ) -> Result<()> {
         instructions::lock_and_send(ctx, amount, &recipient_address)?;
         Ok(())
     }
 
-    pub fn redeem_what(ctx: Context<RedeemWhat>, vaa_hash: [u8; 32]) -> Result<()> {
-        instructions::redeem_what(ctx, vaa_hash)?;
+    pub fn redeem_and_unlock(ctx: Context<RedeemAndUnlock>, vaa_hash: [u8; 32]) -> Result<()> {
+        instructions::redeem_and_unlock(ctx, vaa_hash)?;
         Ok(())
     }
 

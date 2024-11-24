@@ -280,9 +280,6 @@ export class WhatTokenBridge {
     amount: number,
     recipientAddress: string
   ): Promise<Transaction> {
-    if (!ethers.utils.isAddress(recipientAddress)) {
-      throw Error("Invalid EVM recipient address");
-    }
 
     const configData = await this.getConfigData();
 
@@ -291,7 +288,7 @@ export class WhatTokenBridge {
     );
 
     const evmRecipientArrayified = Array.from(
-      ethers.utils.zeroPad(recipientAddress, 20)
+      ethers.utils.zeroPad(recipientAddress, 32)
     );
 
     const wormholeCpiAccounts = () => {
@@ -346,7 +343,7 @@ export class WhatTokenBridge {
     return tx;
   }
 
-  public async redeemWhat(
+  public async redeemAndUnlock(
     recipient: PublicKey,
     wormholeMessage: SignedVaa | ParsedVaa
   ): Promise<Transaction> {
@@ -363,7 +360,7 @@ export class WhatTokenBridge {
     );
 
     const tx = await this.program.methods
-      .redeemWhat([...parsed.hash])
+      .redeemAndUnlock([...parsed.hash])
       .accountsPartial({
         payer: recipient,
         recipient: recipient,

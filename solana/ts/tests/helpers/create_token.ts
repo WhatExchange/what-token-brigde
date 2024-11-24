@@ -1,6 +1,6 @@
 import * as anchor from '@coral-xyz/anchor';
 
-import { Keypair, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import { Keypair, PublicKey, Signer, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   ExtensionType,
@@ -14,7 +14,7 @@ import {
 } from '@solana/spl-token';
 import { Program, Provider } from '@coral-xyz/anchor';
 
-export async function createTransferFeeConfigToken(provider: Provider, wallet: anchor.Wallet, decimals: number): Promise<PublicKey> {
+export async function createTransferFeeConfigToken(provider: Provider, wallet: Signer, decimals: number): Promise<PublicKey> {
   const mint = new Keypair();
 
   const extensions = [ExtensionType.TransferFeeConfig];
@@ -40,12 +40,12 @@ export async function createTransferFeeConfigToken(provider: Provider, wallet: a
     createInitializeMintInstruction(mint.publicKey, decimals, wallet.publicKey, null, TOKEN_2022_PROGRAM_ID),
   );
 
-  await sendAndConfirmTransaction(provider.connection, transaction, [wallet.payer, mint], { skipPreflight: true, commitment: 'confirmed' });
+  await sendAndConfirmTransaction(provider.connection, transaction, [wallet, mint], { skipPreflight: true, commitment: 'confirmed' });
 
   return mint.publicKey;
 }
 
-export async function mintTransferHookTokenTo(provider: Provider, wallet: anchor.Wallet, recipient: PublicKey, mint: PublicKey, amount: number): Promise<String> {
+export async function mintTransferHookTokenTo(provider: Provider, wallet: Signer, recipient: PublicKey, mint: PublicKey, amount: number): Promise<String> {
   const destinationTokenAccount = getAssociatedTokenAddressSync(
     mint,
     recipient,
@@ -66,7 +66,7 @@ export async function mintTransferHookTokenTo(provider: Provider, wallet: anchor
     createMintToInstruction(mint, destinationTokenAccount, wallet.publicKey, amount, [], TOKEN_2022_PROGRAM_ID),
   );
 
-  const txSig = await sendAndConfirmTransaction(provider.connection, transaction, [wallet.payer], { skipPreflight: true });
+  const txSig = await sendAndConfirmTransaction(provider.connection, transaction, [wallet], { skipPreflight: true });
 
   return txSig
 

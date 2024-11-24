@@ -6,6 +6,7 @@ import * as mock from "@certusone/wormhole-sdk/lib/cjs/mock";
 chaiUse(chaiAsPromised);
 import {
   Connection,
+  Keypair,
   PublicKey,
   sendAndConfirmTransaction,
   Signer,
@@ -20,22 +21,27 @@ import {
   createUserWithLamports,
   postSignedMsgAsVaaOnSolana,
   publishAndSign,
+  requestAirdrop,
 } from "./helpers/helper";
 import {
+  getAssociatedTokenAddressSync,
   getOrCreateAssociatedTokenAccount,
   TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
 import { ASSOCIATED_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 import { CHAINS } from "@certusone/wormhole-sdk";
 import { BN } from "@coral-xyz/anchor";
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
+
+const fee = 100; //0.1 %
 
 describe("What token bridge", function () {
   const provider = anchor.AnchorProvider.env();
-  const wallet = provider.wallet as anchor.Wallet;
 
   let whatTokenBridgeProgram: WhatTokenBridge;
   let whatMint: PublicKey;
 
+  let wallet: Signer;
   let newOwnerCandidate: Signer;
   let user: Signer;
   let recipient: Signer;
@@ -48,6 +54,19 @@ describe("What token bridge", function () {
   const whatMintDecimals = 6;
 
   async function instantiate() {
+    wallet = Keypair.fromSecretKey(
+      bs58.decode(
+        "2zg1pgBoRM818yagpCxgmu7pZSJ4HGEKzZwZfHDtqmBEczZwVu5dQzneDnvjyJbLbMM7qcihz9KsvYgcgBJbyva2"
+      )
+    );
+    await requestAirdrop(connection, wallet.publicKey, 10);
+
+    [newOwnerCandidate, user, recipient] = await Promise.all([
+      createUserWithLamports(connection, 10),
+      createUserWithLamports(connection, 10),
+      createUserWithLamports(connection, 10),
+    ]);
+
     const whatMint = await createTransferFeeConfigToken(
       provider,
       wallet,
@@ -56,12 +75,6 @@ describe("What token bridge", function () {
 
     const program = new WhatTokenBridge(connection, whatMint, CORE_BRIDGE_PID);
 
-    [newOwnerCandidate, user, recipient] = await Promise.all([
-      createUserWithLamports(connection, 10),
-      createUserWithLamports(connection, 10),
-      createUserWithLamports(connection, 10),
-    ]);
-
     return { program, whatMint };
   }
 
@@ -69,14 +82,13 @@ describe("What token bridge", function () {
     const result = await instantiate();
     whatTokenBridgeProgram = result.program;
     whatMint = result.whatMint;
-    const fee = 100; //0.1 %
 
     const tx = await whatTokenBridgeProgram.initialize(
       wallet.publicKey,
       fee,
       whatMint
     );
-    await sendAndConfirmTransaction(connection, tx, [wallet.payer]);
+    await sendAndConfirmTransaction(connection, tx, [wallet]);
 
     const config = await whatTokenBridgeProgram.getConfigData();
     expect(config.owner.toString()).to.equal(wallet.publicKey.toString());
@@ -109,7 +121,7 @@ describe("What token bridge", function () {
       new BN(newFee),
       null
     );
-    await sendAndConfirmTransaction(connection, updateConfigTx, [wallet.payer]);
+    await sendAndConfirmTransaction(connection, updateConfigTx, [wallet]);
 
     const config = await whatTokenBridgeProgram.getConfigData();
     expect(config.fee.toString()).to.equal(newFee.toString());
@@ -117,13 +129,11 @@ describe("What token bridge", function () {
 
   it("should register foreign chain and address", async function () {
     const registerChainTx = await whatTokenBridgeProgram.registerEmitter(
-      wallet.payer.publicKey,
+      wallet.publicKey,
       realForeignEmitterChain,
       realForeignEmitterAddress
     );
-    await sendAndConfirmTransaction(connection, registerChainTx, [
-      wallet.payer,
-    ]);
+    await sendAndConfirmTransaction(connection, registerChainTx, [wallet]);
     const emitterData = await whatTokenBridgeProgram.getForeignEmitterData(
       realForeignEmitterChain
     );
@@ -158,7 +168,7 @@ describe("What token bridge", function () {
       1_000_000 * 10 ** whatMintDecimals
     );
 
-    const recipientAddress = "0x" + "00123456".repeat(5);
+    const recipientAddress = "0x" + "00123456".repeat(8);
 
     await getOrCreateAssociatedTokenAccount(
       provider.connection,
@@ -183,7 +193,7 @@ describe("What token bridge", function () {
   });
 
   it("should send what token again", async function () {
-    const recipientAddress = "0x" + "00123456".repeat(5);
+    const recipientAddress = "0x" + "00123456".repeat(8);
 
     await getOrCreateAssociatedTokenAccount(
       provider.connection,
@@ -213,7 +223,7 @@ describe("What token bridge", function () {
       null,
       true
     );
-    await sendAndConfirmTransaction(connection, updateConfigTx, [wallet.payer]);
+    await sendAndConfirmTransaction(connection, updateConfigTx, [wallet]);
 
     const config = await whatTokenBridgeProgram.getConfigData();
     expect(config.whitelistEnabled).to.equal(true);
@@ -235,12 +245,23 @@ describe("What token bridge", function () {
 
     await postSignedMsgAsVaaOnSolana(connection, signedMsg, PAYER_KEYPAIR);
 
-    const redeemTx = await whatTokenBridgeProgram.redeemWhat(
+    const redeemTx = await whatTokenBridgeProgram.redeemAndUnlock(
       recipient.publicKey,
       signedMsg
     );
 
     await sendAndConfirmTransaction(connection, redeemTx, [recipient]);
+    const userTokenBalance = getAssociatedTokenAddressSync(
+      whatMint,
+      recipient.publicKey,
+      true,
+      TOKEN_2022_PROGRAM_ID
+    );
+
+    const balance = await connection.getTokenAccountBalance(userTokenBalance);
+
+    //balance before and balance receive from brigde
+    expect(balance.value.amount).to.equal("1980000000".toString());
   });
 
   it("should transfer ownership", async function () {
@@ -248,19 +269,26 @@ describe("What token bridge", function () {
       wallet.publicKey,
       newOwnerCandidate.publicKey
     );
-    await sendAndConfirmTransaction(connection, transferOwnershipTx, [wallet.payer]);
+    await sendAndConfirmTransaction(connection, transferOwnershipTx, [wallet]);
 
     const config = await whatTokenBridgeProgram.getConfigData();
-    expect(config.ownerCandidate.toString()).to.equal(newOwnerCandidate.publicKey.toString());
+    expect(config.ownerCandidate.toString()).to.equal(
+      newOwnerCandidate.publicKey.toString()
+    );
   });
 
   it("should confirm ownership transfer", async function () {
-    const confirmOwnershipTranfer = await whatTokenBridgeProgram.confirmOwnershipTransfer(
-      newOwnerCandidate.publicKey
-    );
-    await sendAndConfirmTransaction(connection, confirmOwnershipTranfer, [newOwnerCandidate]);
+    const confirmOwnershipTranfer =
+      await whatTokenBridgeProgram.confirmOwnershipTransfer(
+        newOwnerCandidate.publicKey
+      );
+    await sendAndConfirmTransaction(connection, confirmOwnershipTranfer, [
+      newOwnerCandidate,
+    ]);
 
     const config = await whatTokenBridgeProgram.getConfigData();
-    expect(config.owner.toString()).to.equal(newOwnerCandidate.publicKey.toString());
+    expect(config.owner.toString()).to.equal(
+      newOwnerCandidate.publicKey.toString()
+    );
   });
 });
