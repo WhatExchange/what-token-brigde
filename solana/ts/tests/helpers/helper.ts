@@ -1,12 +1,20 @@
-import { Keypair, Connection, Signer, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import {
+  Keypair,
+  Connection,
+  Signer,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+} from "@solana/web3.js";
 import { CORE_BRIDGE_PID, MOCK_GUARDIANS } from "./consts";
-import { NodeWallet, postVaaSolana } from "@certusone/wormhole-sdk/lib/cjs/solana";
+import {
+  NodeWallet,
+  postVaaSolana,
+} from "@certusone/wormhole-sdk/lib/cjs/solana";
 import * as mock from "@certusone/wormhole-sdk/lib/cjs/mock";
-import { BN } from "@coral-xyz/anchor";
 
 export async function createUserWithLamports(
   connection: Connection,
-  lamports: number,
+  lamports: number
 ): Promise<Signer> {
   const account = Keypair.generate();
   const signature = await connection.requestAirdrop(
@@ -18,11 +26,31 @@ export async function createUserWithLamports(
   return account;
 }
 
-export function publishAndSign(recipient: PublicKey, amount: bigint, emitter: mock.MockEmitter) {
-  const buf = Buffer.alloc(41);
-  buf.writeUInt8(1, 0);//REDEEM PAYLOAD
+export async function requestAirdrop(
+  connection: Connection,
+  recipient: PublicKey,
+  lamports: number
+) {
+  const signature = await connection.requestAirdrop(
+    recipient,
+    lamports * LAMPORTS_PER_SOL
+  );
+  const block = await connection.getLatestBlockhash();
+  await connection.confirmTransaction({ ...block, signature });
+}
+
+export function publishAndSign(
+  recipient: PublicKey,
+  amount: bigint,
+  emitter: mock.MockEmitter
+) {
+  const buf = Buffer.alloc(65);
+  buf.writeUInt8(1, 0); //REDEEM PAYLOAD
   recipient.toBuffer().copy(buf, 1);
-  buf.writeBigInt64BE(amount, 33);
+  const amountBuffer = Buffer.alloc(32);
+  let amountHex = amount.toString(16).padStart(64, "0");
+  Buffer.from(amountHex, "hex").copy(amountBuffer);
+  amountBuffer.copy(buf, 33);
   const finality = 1;
   const batchId = 0;
 
@@ -30,8 +58,7 @@ export function publishAndSign(recipient: PublicKey, amount: bigint, emitter: mo
 }
 
 export function guardianSign(message: Buffer) {
-  return MOCK_GUARDIANS.addSignatures(message, [0])
-
+  return MOCK_GUARDIANS.addSignatures(message, [0]);
 }
 
 export async function postSignedMsgAsVaaOnSolana(
@@ -49,4 +76,3 @@ export async function postSignedMsgAsVaaOnSolana(
     signedMsg
   );
 }
-

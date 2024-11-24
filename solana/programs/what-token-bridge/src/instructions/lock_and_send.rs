@@ -4,14 +4,15 @@ use anchor_spl::{
     token_2022::Token2022,
     token_interface::{Mint, TokenAccount},
 };
+use primitive_types::U256;
 use wormhole_anchor_sdk::wormhole::{self, program::Wormhole};
 
 use crate::{
     constants::{SEED_PREFIX_CONFIG, SEED_PREFIX_MESSAGE},
-    helper::{compute_adjusted_amount, get_transfer_fee, transfer_token_to_pool},
+    helper::{get_transfer_fee, transfer_token_to_pool},
     ConfigAccount, WhatTokenBridgeError, WhatTokenBridgeMessage,
 };
-pub type EvmAddress = [u8; 20];
+pub type EvmAddress = [u8; 32];
 
 #[derive(AnchorSerialize)]
 struct SendMessage<'a> {
@@ -78,17 +79,14 @@ pub struct LockAndSend<'info> {
 }
 
 #[event]
-pub struct SendWhatEvent {
+pub struct LockAndSendEvent {
     pub user: Pubkey,
     pub amount: u64,
     pub timestamp: i64,
+    pub sequence: u64,
 }
 
 pub fn lock_and_send(ctx: Context<LockAndSend>, amount: u64, recipient: &EvmAddress) -> Result<()> {
-    let config_account = &mut ctx.accounts.config_account;
-
-    let adjust_amount = compute_adjusted_amount(config_account, &ctx.accounts.user.key(), amount)?;
-
     let clock = Clock::get()?;
 
     transfer_token_to_pool(
@@ -97,7 +95,7 @@ pub fn lock_and_send(ctx: Context<LockAndSend>, amount: u64, recipient: &EvmAddr
         ctx.accounts.user.to_account_info(),
         ctx.accounts.token_2022_program.to_account_info(),
         ctx.accounts.what_mint.clone(),
-        adjust_amount,
+        amount,
     )?;
 
     let amount_transfer_fee = get_transfer_fee(ctx.accounts.what_mint.clone(), amount).unwrap();
@@ -118,13 +116,15 @@ pub fn lock_and_send(ctx: Context<LockAndSend>, amount: u64, recipient: &EvmAddr
 
     let message_bump = ctx.bumps.wormhole_message;
 
-    let finalized_amount = adjust_amount.checked_sub(amount_transfer_fee).unwrap();
+    let finalized_amount = amount.checked_sub(amount_transfer_fee).unwrap();
 
-    let payload: Vec<u8> = WhatTokenBridgeMessage::Send {
+    let payload: Vec<u8> = WhatTokenBridgeMessage::TransferPayload {
         recipient: *recipient,
-        amount: finalized_amount.to_be_bytes(),
+        amount: U256::from(finalized_amount).to_big_endian(),
     }
     .try_to_vec()?;
+
+    let sequence = ctx.accounts.config_account.sequence.clone();
 
     wormhole::post_message(
         CpiContext::new_with_signer(
@@ -144,7 +144,7 @@ pub fn lock_and_send(ctx: Context<LockAndSend>, amount: u64, recipient: &EvmAddr
                 &[SEED_PREFIX_CONFIG, &[ctx.accounts.config_account.bump]],
                 &[
                     SEED_PREFIX_MESSAGE,
-                    &(ctx.accounts.config_account.sequence + 1).to_le_bytes(),
+                    &(sequence + 1).to_le_bytes(),
                     &[message_bump],
                 ],
             ],
@@ -156,10 +156,11 @@ pub fn lock_and_send(ctx: Context<LockAndSend>, amount: u64, recipient: &EvmAddr
 
     ctx.accounts.config_account.sequence += 1;
 
-    emit!(SendWhatEvent {
+    emit!(LockAndSendEvent {
         user: *ctx.accounts.user.key,
         amount: finalized_amount,
         timestamp: clock.unix_timestamp,
+        sequence: sequence
     });
 
     Ok(())
