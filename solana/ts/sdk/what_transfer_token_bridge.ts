@@ -37,6 +37,8 @@ const SEED_PREFIX_CONFIG = Buffer.from("config", "utf-8");
 const SEED_EMITTER_SEQUENCE = Buffer.from("emitter", "utf-8");
 
 export type ConfigData = IdlAccounts<WhatTokenBridgeTypes>["configAccount"];
+export type ReceivedData = IdlAccounts<WhatTokenBridgeTypes>['received'];
+
 export interface ForeignEmitter {
   chain: ChainId;
   address: Buffer;
@@ -108,6 +110,22 @@ export class WhatTokenBridge {
       configPDA
     );
     return configData;
+  }
+
+  public async getReceivedData(parsedVaa: ParsedVaa): Promise<ReceivedData | null> {
+    try {
+      const receivedPDA = this.deriveReceivedKey(
+        this.program.programId,
+        parsedVaa.emitterChain as ChainId,
+        parsedVaa.sequence,
+        parsedVaa.emitterAddress,
+      );
+      const receivedData =
+        await this.program.account.received.fetch(receivedPDA);
+      return receivedData;
+    } catch (error) {
+      return null;
+    }
   }
 
   public async getForeignEmitterData(chain: ChainId): Promise<ForeignEmitter> {
