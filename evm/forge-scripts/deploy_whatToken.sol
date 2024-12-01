@@ -5,14 +5,14 @@ pragma solidity ^0.8.0;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 
-import {WormUSD} from "modules/token/WormUSD.sol";
+import {WhatToken} from "modules/token/WhatToken.sol";
 
 contract ContractScript is Script {
-    WormUSD wormUsd;
+    WhatToken whatToken;
 
-    function deployWormUSD() public {
+    function deployWhatToken() public {
         // deploy the ERC20 token
-        wormUsd = new WormUSD(
+        whatToken = new WhatToken(
             vm.addr(uint256(vm.envBytes32("WALLET_PRIVATE_KEY"))),
             6, // token decimals
             1e9 // supply
@@ -24,7 +24,7 @@ contract ContractScript is Script {
         vm.startBroadcast();
 
         // HelloToken.sol
-        deployWormUSD();
+        deployWhatToken();
 
         // finished
         vm.stopBroadcast();

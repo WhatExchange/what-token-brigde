@@ -15,7 +15,7 @@ export function readHelloTokenContractAddress(chain: ChainId): string {
 export function readWormUSDContractAddress(chain: ChainId): string {
   return JSON.parse(
     fs.readFileSync(
-      `${__dirname}/../../broadcast/deploy_wormUSD.sol/${chain}/run-latest.json`,
+      `${__dirname}/../../broadcast/deploy_whatToken.sol/${chain}/run-latest.json`,
       "utf-8"
     )
   ).transactions[0].contractAddress;

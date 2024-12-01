@@ -12,8 +12,12 @@ contract ContractScript is Script {
     IWormhole wormhole;
     WhatTokenBridge whatTokenBridge;
 
+    uint32 feePrecision;
+    uint32 relayerFee;
     function setUp() public {
-        wormhole = IWormhole(vm.envAddress("TESTING_WORMHOLE_ADDRESS"));
+        wormhole = IWormhole(vm.envAddress("WORMHOLE_ADDRESS"));
+        relayerFee = uint32(vm.envUint("RELAYER_FEE"));
+        feePrecision = uint32(vm.envUint("FEE_PRECISION"));
     }
 
     function deployWhatTokenBridge() public {
@@ -21,8 +25,8 @@ contract ContractScript is Script {
             address(wormhole),
             wormhole.chainId(),
             1, // wormholeFinality
-            1e6, // feePrecision
-            10000 // relayerFee (percentage terms)
+            feePrecision,
+            relayerFee // relayerFee (percentage terms)
         );
     }
 

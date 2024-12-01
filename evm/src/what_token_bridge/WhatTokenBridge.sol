@@ -298,4 +298,98 @@ contract WhatTokenBridge is
         require(owner() == msg.sender, "caller not the owner");
         _;
     }
+
+    /**
+     * @notice Updates the owner address of the contract
+     * @param owner_ New owner address
+     */
+    function updateOwner(address owner_) public onlyOwner {
+        if (owner_ == address(0)) {
+            revert WormholeZeroAddress();
+        }
+        setOwner(owner_);
+    }
+
+    /**
+     * @notice Updates the Wormhole contract address
+     * @param wormhole_ New Wormhole contract address
+     */
+    function updateWormhole(address wormhole_) public onlyOwner {
+        if (wormhole_ == address(0)) {
+            revert WormholeZeroAddress();
+        }
+        setWormhole(wormhole_);
+    }
+
+    /**
+     * @notice Updates the chain ID
+     * @param chainId_ New chain ID
+     */
+    function updateChainId(uint16 chainId_) public onlyOwner {
+        if (chainId_ == 0) {
+            revert WrongChainId();
+        }
+        setChainId(chainId_);
+    }
+
+    /**
+     * @notice Updates the Wormhole finality requirement
+     * @param finality New finality value
+     */
+    function updateWormholeFinality(uint8 finality) public onlyOwner {
+        if (finality == 0) {
+            revert WrongWormholeFinality();
+        }
+        setWormholeFinality(finality);
+    }
+
+    /**
+     * @notice Updates the fee precision value
+     * @param feePrecision_ New fee precision value
+     */
+    function updateFeePrecision(uint32 feePrecision_) public onlyOwner {
+        if (feePrecision_ == 0) {
+            revert InvalidAmount();
+        }
+        setFeePrecision(feePrecision_);
+    }
+
+    /**
+     * @notice Updates the relayer fee percentage
+     * @param relayerFeePercentage_ New relayer fee percentage
+     */
+    function updateRelayerFeePercentage(uint32 relayerFeePercentage_) public onlyOwner {
+        if (relayerFeePercentage_ > feePrecision()) {
+            revert InvalidAmount();
+        }
+        setRelayerFeePercentage(relayerFeePercentage_);
+    }
+
+    /**
+     * @notice Updates the contract pause state
+     * @param paused New pause state
+     */
+    function updatePaused(bool paused) public onlyOwner {
+        setPaused(paused);
+    }
+
+    /**
+     * @notice Updates the whitelist enabled state
+     * @param enabled New whitelist enabled state
+     */
+    function updateWhitelistEnabled(bool enabled) public onlyOwner {
+        setWhitelistEnabled(enabled);
+    }
+
+    /**
+     * @notice Updates the whitelist status for an account
+     * @param account Address to update
+     * @param enabled Whitelist status
+     */
+    function updateWhitelist(address account, bool enabled) public onlyOwner {
+        if (account == address(0)) {
+            revert WormholeZeroAddress();
+        }
+        setWhitelist(account, enabled);
+    }
 }

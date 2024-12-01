@@ -1,60 +1,127 @@
-# Wormhole Integration in Solana
 
-These programs are enumerated the same as the other smart contract
-subdirectories (e.g. [evm](../evm)).
 
-## Design Documents
+## WhatTokenBridge Admin Functions
 
-Read the design documents for each example project:
+This section describes all administrative functions available in the WhatTokenBridge SDK. These functions are restricted to the contract owner/admin.
 
-1. [hello-world](../docs/01_hello_world.md)
-2. [hello-token](../docs/02_hello_token.md)
-3. [nft-burn-bridging](../docs/03_nft_burn_bridging.md)
+### Core Admin Functions
 
-## Getting Started
-
-> **Warning**
-> These programs are written assuming you are building with Solana 1.14. Any
-> higher versions are untested.
-
-First, you will need `cargo` and `anchor` CLI tools. If you need these tools,
-please visit the [Anchor book] for more details.
-
-Once you have the above CLI tools, you can build the programs by simply running
-`make` that runs the [Makefile](https://github.com/wormhole-foundation/wormhole-scaffolding/blob/main/solana/Makefile) and install  subdirectory's dependencies, such as
-`node_modules` and the Wormhole programs from the `solana` directory of the
-[Wormhole repo].
-
-## Build
-
-Set the `NETWORK` environment variable to either "devnet", "testnet" or
-"mainnet" prior to using the `make build` command. For example:
-
-```sh
-NETWORK=testnet make build
+#### Initialize
+```typescript
+initialize(owner: PublicKey, fee: number, whatMint: PublicKey): Promise<Transaction>
 ```
 
-## Tests
+Initializes the WhatTokenBridge contract with initial parameters.
+- `owner`: The initial owner's public key
+- `fee`: The initial transfer fee amount
+- `whatMint`: The WHAT token mint address
+- Returns: Transaction that needs to be signed and submitted
 
-> **Note**
+#### Update Config
+```typescript
+updateConfig(owner: PublicKey, newFee: BN | null, whitelistEnabled: boolean | null): Promise<Transaction>
+```
 
-> Some users reported issues with `make --version` < 4.x. 
-> If you get a make error like `*** missing separator`, try updating to a later `make` version with 'brew reinstall make'
+Updates the contract's configuration parameters.
+- `owner`: Current owner's public key
+- `newFee`: New transfer fee amount (pass null to keep current value)
+- `whitelistEnabled`: Enable/disable whitelist functionality (pass null to keep current value)
+- Returns: Transaction that needs to be signed and submitted
 
+### Ownership Management
 
-To run both unit and integration tests, run `make test`. If you want to isolate
-your testing, use either of these commands:
+#### Transfer Ownership
+```typescript
+transferOwnership(owner: PublicKey, newOwnerCandidate: PublicKey): Promise<Transaction>
+```
 
-- `make unit-test` - Runs `cargo clippy` and `cargo test`
-- `make integration-test` - Spawns a solana local validator and uses `ts-mocha`
-  with `@solana/web3.js` to interact with the example programs.
+Initiates ownership transfer to a new address. The transfer must be confirmed by the new owner.
+- `owner`: Current owner's public key
+- `newOwnerCandidate`: New owner's public key
+- Returns: Transaction that needs to be signed and submitted
 
-## Code Changes
+#### Confirm Ownership Transfer
+```typescript
+confirmOwnershipTransfer(ownerCandidate: PublicKey): Promise<Transaction>
+```
 
-If you are pushing code to a branch and there is a PR associated with it, we
-recommend running `make clean` to make sure the environment does not have any
-old artifacts. Then run the tests above afterwards to ensure that all of
-the tests run as you expect.
+Confirms ownership transfer. Must be called by the new owner candidate.
+- `ownerCandidate`: The public key of the owner candidate
+- Returns: Transaction that needs to be signed and submitted
+
+### Whitelist Management
+
+#### Add Whitelist
+```typescript
+addWhitelist(owner: PublicKey, whitelists: PublicKey[]): Promise<Transaction>
+```
+
+Adds addresses to the whitelist.
+- `owner`: Current owner's public key
+- `whitelists`: Array of public keys to add to whitelist
+- Returns: Transaction that needs to be signed and submitted
+
+#### Remove Whitelist
+```typescript
+removeWhitelist(owner: PublicKey, whitelists: PublicKey[]): Promise<Transaction>
+```
+
+Removes addresses from the whitelist.
+- `owner`: Current owner's public key
+- `whitelists`: Array of public keys to remove from whitelist
+- Returns: Transaction that needs to be signed and submitted
+
+### Cross-Chain Configuration
+
+#### Register Emitter
+```typescript
+registerEmitter(owner: PublicKey, chainId: ChainId, foreignEmitterAddress: Buffer): Promise<Transaction>
+```
+
+Registers a foreign emitter for cross-chain transfers.
+- `owner`: Current owner's public key
+- `chainId`: The chain ID of the foreign emitter
+- `foreignEmitterAddress`: The address of the foreign emitter contract
+- Returns: Transaction that needs to be signed and submitted
+
+### Usage Example
+
+```typescript
+// Initialize SDK
+const whatBridge = new WhatTokenBridge(connection, whatMintAddress);
+
+// Initialize contract
+const initTx = await whatBridge.initialize(
+  ownerKeypair.publicKey,
+  1000, // fee
+  whatMintAddress
+);
+await sendAndConfirmTransaction(connection, initTx, [ownerKeypair]);
+
+// Update config
+//We use basis point is 10000 so 2000 meaning 20%
+const updateTx = await whatBridge.updateConfig(
+  ownerKeypair.publicKey,
+  new BN(2000), // new fee
+  true // enable whitelist
+);
+await sendAndConfirmTransaction(connection, updateTx, [ownerKeypair]);
+
+// Add addresses to whitelist
+const addWhitelistTx = await whatBridge.addWhitelist(
+  ownerKeypair.publicKey,
+  [user1.publicKey, user2.publicKey]
+);
+await sendAndConfirmTransaction(connection, addWhitelistTx, [ownerKeypair]);
+```
+
+### Important Notes
+
+1. All these functions require owner privileges to execute
+2. Transactions must be signed by the appropriate authority (owner or owner candidate)
+3. Some operations (like ownership transfer) require multiple steps to complete
+4. Failed transactions will revert if called by non-authorized addresses
+5. All functions return an unsigned transaction that must be signed and submitted to the network
 
 [anchor book]: https://book.anchor-lang.com/getting_started/installation.html
 [wormhole repo]: https://github.com/wormhole-foundation/wormhole/tree/main/solana

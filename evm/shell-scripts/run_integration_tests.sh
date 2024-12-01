@@ -28,31 +28,37 @@ ETH_RPC="http://localhost:8546"
 PRIVATE_KEY="0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
 
 ## override environment variables based on deployment network
-export TESTING_WORMHOLE_ADDRESS=$TESTING_AVAX_WORMHOLE_ADDRESS
+export WORMHOLE_ADDRESS=$TESTING_AVAX_WORMHOLE_ADDRESS
 export TESTING_BRIDGE_ADDRESS=$TESTING_AVAX_BRIDGE_ADDRESS
 
 echo "deploying contracts to Avalanche fork"
 
-forge script forge-scripts/deploy_wormUSD.sol \
+forge script forge-scripts/deploy_whatToken.sol \
     --rpc-url $AVAX_RPC \
     --private-key $PRIVATE_KEY \
     --broadcast --slow > forge-scripts/deploy.out 2>&1
 
+export RELAYER_FEE=1000
+export FEE_PRECISION=10000
 forge script forge-scripts/deploy_what_token_bridge.sol \
     --rpc-url $AVAX_RPC \
     --private-key $PRIVATE_KEY \
     --broadcast --slow > forge-scripts/deploy.out 2>&1
 
 ## override environment variables based on deployment network
-export TESTING_WORMHOLE_ADDRESS=$TESTING_ETH_WORMHOLE_ADDRESS
+export WORMHOLE_ADDRESS=$TESTING_ETH_WORMHOLE_ADDRESS
 export TESTING_BRIDGE_ADDRESS=$TESTING_ETH_BRIDGE_ADDRESS
 
 echo "deploying contracts to Ethereum fork"
-forge script forge-scripts/deploy_wormUSD.sol \
+forge script forge-scripts/deploy_whatToken.sol \
     --rpc-url $ETH_RPC \
     --private-key $PRIVATE_KEY \
     --broadcast --slow > forge-scripts/deploy.out 2>&1
 
+
+export RELAYER_FEE=1000
+export FEE_PRECISION=10000
+echo "deploying what token bridge contracts to Ethereum fork"
 forge script forge-scripts/deploy_what_token_bridge.sol \
     --rpc-url $ETH_RPC \
     --private-key $PRIVATE_KEY \

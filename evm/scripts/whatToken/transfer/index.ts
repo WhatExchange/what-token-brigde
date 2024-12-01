@@ -1,0 +1,14 @@
+import { transfer } from "./transfer";
+
+const RPC_URL = "<RPC_URL>";
+const WHAT_TOKEN_BRIDGE_ADDRESS = "<WHAT_TOKEN_BRIDGE_ADDRESS>";
+const PRIVATE_KEY = "<PRIVATE_KEY>";
+const AMOUNT = 1000000000000000000;
+
+transfer(
+  RPC_URL,
+  WHAT_TOKEN_BRIDGE_ADDRESS,
+  PRIVATE_KEY,
+  WHAT_TOKEN_BRIDGE_ADDRESS,
+  AMOUNT
+);

@@ -1,0 +1,1118 @@
+{
+  "address": "H2A4zRKip3vL652k6sxXtSYRTbnzBrrREvAjPKu7nAr",
+  "metadata": {
+    "name": "what_token_bridge",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Bridge token WHAT between Solana and Base"
+  },
+  "instructions": [
+    {
+      "name": "add_whitelists",
+      "discriminator": [
+        164,
+        164,
+        75,
+        161,
+        172,
+        106,
+        159,
+        195
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "whitelists",
+          "type": {
+            "vec": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "confirm_ownership_transfer",
+      "discriminator": [
+        44,
+        137,
+        156,
+        242,
+        47,
+        7,
+        37,
+        101
+      ],
+      "accounts": [
+        {
+          "name": "owner_candidate",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config_account",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "what_mint",
+          "writable": true
+        },
+        {
+          "name": "config_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "fee",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "lock_and_send",
+      "discriminator": [
+        236,
+        85,
+        228,
+        53,
+        216,
+        83,
+        251,
+        239
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "what_mint",
+          "writable": true
+        },
+        {
+          "name": "config_account",
+          "writable": true
+        },
+        {
+          "name": "vault_token_account",
+          "writable": true
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "wormhole_message",
+          "writable": true
+        },
+        {
+          "name": "wormhole_sequence",
+          "writable": true
+        },
+        {
+          "name": "wormhole_bridge",
+          "writable": true
+        },
+        {
+          "name": "wormhole_fee_collector",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  101,
+                  101,
+                  95,
+                  99,
+                  111,
+                  108,
+                  108,
+                  101,
+                  99,
+                  116,
+                  111,
+                  114
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "wormhole_program",
+          "address": "3u8hJUVTA4jH1wYAyUur7FFZVQ8H635K3tSHHF4ssjQ5"
+        },
+        {
+          "name": "token_2022_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "recipient_address",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "redeem_and_unlock",
+      "discriminator": [
+        163,
+        149,
+        242,
+        130,
+        202,
+        251,
+        53,
+        201
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "docs": [
+            "Payer will pay Wormhole fee to transfer tokens and create temporary",
+            "token account."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "recipient",
+          "docs": [
+            "transaction."
+          ],
+          "writable": true
+        },
+        {
+          "name": "what_mint",
+          "writable": true
+        },
+        {
+          "name": "config_account",
+          "writable": true
+        },
+        {
+          "name": "posted",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  80,
+                  111,
+                  115,
+                  116,
+                  101,
+                  100,
+                  86,
+                  65,
+                  65
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vaa_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault_token_account",
+          "writable": true
+        },
+        {
+          "name": "recipient_token_account",
+          "writable": true
+        },
+        {
+          "name": "received",
+          "writable": true
+        },
+        {
+          "name": "foreign_emitter"
+        },
+        {
+          "name": "wormhole_program",
+          "address": "3u8hJUVTA4jH1wYAyUur7FFZVQ8H635K3tSHHF4ssjQ5"
+        },
+        {
+          "name": "token_2022_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vaa_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "register_emitter",
+      "discriminator": [
+        217,
+        153,
+        40,
+        34,
+        190,
+        121,
+        144,
+        105
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config_account",
+          "writable": true
+        },
+        {
+          "name": "foreign_emitter",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "chain",
+          "type": "u16"
+        },
+        {
+          "name": "address",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "remove_whitelists",
+      "discriminator": [
+        149,
+        85,
+        226,
+        90,
+        79,
+        148,
+        99,
+        241
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "whitelists",
+          "type": {
+            "vec": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "transfer_ownership",
+      "discriminator": [
+        65,
+        177,
+        215,
+        73,
+        53,
+        45,
+        99,
+        47
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config_account",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "new_owner_candidate",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "update_config",
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config_account",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "UpdateConfigArgs"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ConfigAccount",
+      "discriminator": [
+        189,
+        255,
+        97,
+        70,
+        186,
+        189,
+        24,
+        102
+      ]
+    },
+    {
+      "name": "ForeignEmitter",
+      "discriminator": [
+        209,
+        139,
+        241,
+        247,
+        96,
+        178,
+        159,
+        2
+      ]
+    },
+    {
+      "name": "Received",
+      "discriminator": [
+        227,
+        186,
+        72,
+        102,
+        0,
+        233,
+        222,
+        41
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "EmitterRegisteredEvent",
+      "discriminator": [
+        128,
+        223,
+        217,
+        159,
+        16,
+        62,
+        181,
+        47
+      ]
+    },
+    {
+      "name": "InitializedEvent",
+      "discriminator": [
+        136,
+        202,
+        63,
+        120,
+        152,
+        146,
+        41,
+        79
+      ]
+    },
+    {
+      "name": "LockAndSendEvent",
+      "discriminator": [
+        219,
+        27,
+        41,
+        204,
+        12,
+        19,
+        131,
+        30
+      ]
+    },
+    {
+      "name": "RedeemAndUnlockEvent",
+      "discriminator": [
+        2,
+        188,
+        192,
+        79,
+        69,
+        234,
+        117,
+        81
+      ]
+    },
+    {
+      "name": "UpdateConfigEvent",
+      "discriminator": [
+        96,
+        112,
+        253,
+        102,
+        59,
+        78,
+        75,
+        134
+      ]
+    },
+    {
+      "name": "WhitelistAddedEvent",
+      "discriminator": [
+        123,
+        13,
+        187,
+        218,
+        198,
+        10,
+        192,
+        230
+      ]
+    },
+    {
+      "name": "WhitelistRemovedEvent",
+      "discriminator": [
+        250,
+        175,
+        142,
+        175,
+        6,
+        201,
+        108,
+        171
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidOwnerCandidate",
+      "msg": "Invalid owner candidate"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidMint",
+      "msg": "InvalidMint"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidTokenOwner",
+      "msg": "Invalid token owner"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidWormholeBridge",
+      "msg": "InvalidWormholeBridge"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidWormholeFeeCollector",
+      "msg": "InvalidWormholeFeeCollector"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidWormholeEmitter",
+      "msg": "InvalidWormholeEmitter"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidWormholeSequence",
+      "msg": "InvalidWormholeSequence"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidSysvar",
+      "msg": "InvalidSysvar"
+    },
+    {
+      "code": 6009,
+      "name": "OwnerOnly",
+      "msg": "OwnerOnly"
+    },
+    {
+      "code": 6010,
+      "name": "Overflow",
+      "msg": "Overflow"
+    },
+    {
+      "code": 6011,
+      "name": "BumpNotFound",
+      "msg": "BumpNotFound"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidForeignContract",
+      "msg": "InvalidForeignContract"
+    },
+    {
+      "code": 6013,
+      "name": "ZeroBridgeAmount",
+      "msg": "ZeroBridgeAmount"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidTokenBridgeConfig",
+      "msg": "InvalidTokenBridgeConfig"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidTokenBridgeAuthoritySigner",
+      "msg": "InvalidTokenBridgeAuthoritySigner"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidTokenBridgeCustodySigner",
+      "msg": "InvalidTokenBridgeCustodySigner"
+    },
+    {
+      "code": 6017,
+      "name": "InvalidTokenBridgeEmitter",
+      "msg": "InvalidTokenBridgeEmitter"
+    },
+    {
+      "code": 6018,
+      "name": "InvalidTokenBridgeSequence",
+      "msg": "InvalidTokenBridgeSequence"
+    },
+    {
+      "code": 6019,
+      "name": "InvalidTokenBridgeSender",
+      "msg": "InvalidTokenBridgeSender"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidRecipient",
+      "msg": "InvalidRecipient"
+    },
+    {
+      "code": 6021,
+      "name": "InvalidTransferTokenAccount",
+      "msg": "InvalidTransferTokenAccount"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidTransferToChain",
+      "msg": "InvalidTransferTokenChain"
+    },
+    {
+      "code": 6023,
+      "name": "InvalidTransferTokenChain",
+      "msg": "InvalidTransferTokenChain"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidRelayerFee",
+      "msg": "InvalidRelayerFee"
+    },
+    {
+      "code": 6025,
+      "name": "InvalidPayerAta",
+      "msg": "InvalidPayerAta"
+    },
+    {
+      "code": 6026,
+      "name": "InvalidTransferToAddress",
+      "msg": "InvalidTransferToAddress"
+    },
+    {
+      "code": 6027,
+      "name": "AlreadyRedeemed",
+      "msg": "AlreadyRedeemed"
+    },
+    {
+      "code": 6028,
+      "name": "InvalidTokenBridgeForeignEndpoint",
+      "msg": "InvalidTokenBridgeForeignEndpoint"
+    },
+    {
+      "code": 6029,
+      "name": "NonExistentRelayerAta",
+      "msg": "NonExistentRelayerAta"
+    },
+    {
+      "code": 6030,
+      "name": "InvalidTokenBridgeMintAuthority",
+      "msg": "InvalidTokenBridgeMintAuthority"
+    },
+    {
+      "code": 6031,
+      "name": "InvalidData",
+      "msg": "InvalidData"
+    },
+    {
+      "code": 6032,
+      "name": "InvalidForeignEmitter",
+      "msg": "InvalidForeignEmitter"
+    }
+  ],
+  "types": [
+    {
+      "name": "ConfigAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner_candidate",
+            "type": "pubkey"
+          },
+          {
+            "name": "wormhole",
+            "type": {
+              "defined": {
+                "name": "WormholeAddresses"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          },
+          {
+            "name": "sequence",
+            "type": "u64"
+          },
+          {
+            "name": "what_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "whitelist_enabled",
+            "type": "bool"
+          },
+          {
+            "name": "whitelists",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "finality",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EmitterRegisteredEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chain",
+            "type": "u16"
+          },
+          {
+            "name": "address",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ForeignEmitter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chain",
+            "type": "u16"
+          },
+          {
+            "name": "address",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LockAndSendEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "sequence",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Received",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "batch_id",
+            "type": "u32"
+          },
+          {
+            "name": "wormhole_message_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RedeemAndUnlockEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "recipient",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateConfigArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "new_fee",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "whitelist_enabled",
+            "type": {
+              "option": "bool"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateConfigEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "new_fee",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "new_whitelist_enabled",
+            "type": {
+              "option": "bool"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistAddedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "added_whitelists",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistRemovedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "removed_whitelists",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WormholeAddresses",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bridge",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_collector",
+            "type": "pubkey"
+          },
+          {
+            "name": "sequence",
+            "type": "pubkey"
+          }
+        ]
+      }
+    }
+  ]
+}

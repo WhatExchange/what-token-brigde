@@ -191,9 +191,7 @@ describe("What token bridge Test", () => {
         [0]
       );
     });
-
     it("Should Receive Transfer Message on ETH", async () => {
-
       const amount = 1_000_000;
       //transfer token to bridge
       {
@@ -235,6 +233,52 @@ describe("What token bridge Test", () => {
 
       // clear localVariables
       localVariables = {};
+    });
+
+    it("Should Update Fee Precision", async () => {
+      const newFeePrecision = 10000;
+      
+      const receipt = await ethWhatTokenBridge
+        .updateFeePrecision(newFeePrecision)
+        .then((tx: ethers.ContractTransaction) => tx.wait());
+      expect(receipt).is.not.null;
+
+      const updatedFeePrecision = await ethWhatTokenBridge.feePrecision();
+      expect(updatedFeePrecision).to.equal(newFeePrecision);
+    });
+    it("Should Update Relayer Fee Percentage", async () => {
+      const newRelayerFeePercentage = 100; // 1% with precision of 10000
+      
+      const receipt = await ethWhatTokenBridge
+        .updateRelayerFeePercentage(newRelayerFeePercentage)
+        .then((tx: ethers.ContractTransaction) => tx.wait());
+      expect(receipt).is.not.null;
+
+      const updatedRelayerFeePercentage = await ethWhatTokenBridge.relayerFeePercentage();
+      expect(updatedRelayerFeePercentage).to.equal(newRelayerFeePercentage);
+    });
+
+    it("Should Update Paused State", async () => {
+      const newPausedState = true;
+      
+      const receipt = await ethWhatTokenBridge
+        .updatePaused(newPausedState)
+        .then((tx: ethers.ContractTransaction) => tx.wait());
+      expect(receipt).is.not.null;
+
+      const updatedPausedState = await ethWhatTokenBridge.isPaused();
+      expect(updatedPausedState).to.equal(newPausedState);
+    });
+    it("Should Update Whitelist Enabled State", async () => {
+      const newWhitelistEnabled = true;
+      
+      const receipt = await ethWhatTokenBridge
+        .updateWhitelistEnabled(newWhitelistEnabled)
+        .then((tx: ethers.ContractTransaction) => tx.wait());
+      expect(receipt).is.not.null;
+
+      const updatedWhitelistEnabled = await ethWhatTokenBridge.isWhitelistEnabled();
+      expect(updatedWhitelistEnabled).to.equal(newWhitelistEnabled);
     });
   });
 });

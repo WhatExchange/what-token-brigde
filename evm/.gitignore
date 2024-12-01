@@ -8,3 +8,4 @@ out.log
 broadcast
 forge-scripts/deploy.out
 ethers-contracts
+.env

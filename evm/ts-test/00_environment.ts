@@ -1,36 +1,25 @@
 import {expect} from "chai";
 import {ethers} from "ethers";
 import {
-  CHAIN_ID_AVAX,
-  CHAIN_ID_ETH,
-  ChainId,
   tryNativeToHexString,
 } from "@certusone/wormhole-sdk";
-import {MockGuardians} from "@certusone/wormhole-sdk/lib/cjs/mock";
 import {
   FORK_AVAX_CHAIN_ID,
   FORK_ETH_CHAIN_ID,
   GUARDIAN_PRIVATE_KEY,
   AVAX_HOST,
   AVAX_WORMHOLE_ADDRESS,
-  AVAX_BRIDGE_ADDRESS,
   AVAX_WORMHOLE_CHAIN_ID,
   AVAX_WORMHOLE_GUARDIAN_SET_INDEX,
   AVAX_WORMHOLE_MESSAGE_FEE,
   ETH_HOST,
   ETH_WORMHOLE_ADDRESS,
-  ETH_BRIDGE_ADDRESS,
   ETH_WORMHOLE_CHAIN_ID,
   ETH_WORMHOLE_GUARDIAN_SET_INDEX,
   ETH_WORMHOLE_MESSAGE_FEE,
   WALLET_PRIVATE_KEY,
 } from "./helpers/consts";
-import {
-  formatWormholeMessageFromReceipt,
-  readWormUSDContractAddress,
-} from "./helpers/utils";
-import {IWormhole__factory, IERC20__factory} from "../ethers-contracts";
-import {ITokenBridge__factory} from "@certusone/wormhole-sdk/lib/cjs/ethers-contracts";
+import {IWormhole__factory} from "../ethers-contracts";
 
 describe("Environment Test", () => {
   // avax wallet

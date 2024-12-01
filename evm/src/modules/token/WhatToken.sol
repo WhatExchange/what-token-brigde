@@ -4,14 +4,14 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract WormUSD is ERC20 {
+contract WhatToken is ERC20 {
     uint8 decimals_;
 
     constructor(
         address mintToAddress,
         uint8 tokenDecimals_,
         uint256 supply
-    ) ERC20("wormUSD", "WUSD"){
+    ) ERC20("WhatToken", "WTT"){
         decimals_ = tokenDecimals_;
         _mint(mintToAddress, supply*10**decimals_);
     }

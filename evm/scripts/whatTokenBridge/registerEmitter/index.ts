@@ -1,0 +1,15 @@
+import { registerEmitter } from "./register_emitter";
+
+const RPC_URL = "<RPC_URL>";
+const WHAT_TOKEN_BRIDGE_ADDRESS = "<WHAT_TOKEN_BRIDGE_ADDRESS>";
+const PRIVATE_KEY = "<PRIVATE_KEY>";
+const EMITTER_CHAIN_ID = 1; //SOLANA
+const EMITTER_ADDRESS = "0x0000000000000000000000000000000000000000"; //bytes32 in string
+
+registerEmitter(
+  RPC_URL,
+  WHAT_TOKEN_BRIDGE_ADDRESS,
+  PRIVATE_KEY,
+  EMITTER_CHAIN_ID,
+  EMITTER_ADDRESS
+);
